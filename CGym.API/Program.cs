@@ -1,4 +1,13 @@
+using Microsoft.EntityFrameworkCore;
+using CGym.Infrastructure.Persistence;
+
 var builder = WebApplication.CreateBuilder(args);
+
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+builder.Services.AddDbContext<GymDbContext>(
+    options => options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
+);
 
 // Add services to the container.
 
