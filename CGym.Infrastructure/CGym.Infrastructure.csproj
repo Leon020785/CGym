@@ -20,6 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\CGym.Application\CGym.Application.csproj" />
     <ProjectReference Include="..\CGym.Domain\CGym.Domain.csproj" />
   </ItemGroup>
 

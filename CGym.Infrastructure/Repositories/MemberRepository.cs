@@ -1,0 +1,53 @@
+﻿using CGym.Infrastructure.Persistence;
+using System;
+using System.Collections.Generic;
+using System.Text;
+using CGym.Application.Interfaces;
+using CGym.Domain.Entities;
+using CGym.Application.Services;
+using Microsoft.EntityFrameworkCore;
+
+namespace CGym.Infrastructure.Repositories
+{
+    public class MemberRepository : IMemberRepository
+    {
+        private readonly GymDbContext gymDbContext;
+
+        public MemberRepository(GymDbContext context) // NÅr jeg opretter MemberRepos.. så giver jeg dig en GymDBContext.
+        {
+            gymDbContext = context;
+
+        }
+
+        public async Task<Member> AddAsync(Member member)
+        {
+            await gymDbContext.Members.AddAsync(member); // tilføje en medlem 
+            await gymDbContext.SaveChangesAsync(); // gem 
+
+            return member;
+        }
+
+        public async Task DeleteAsync(int id)
+        {
+            var member = await gymDbContext.Members.FindAsync(id); // vi gemmer member i en variable 
+            
+            if(member != null) // vi tjeker den som vi har fundet 
+            {
+                gymDbContext.Members.Remove(member); // vi fjerne den 
+                await gymDbContext.SaveChangesAsync(); // vi gemmer !
+
+            }
+        }
+
+        public async Task<List<Member>> GetAllAsync()
+        {
+           return await gymDbContext.Members.ToListAsync(); // metoden til at hente alle medlemer.
+
+        }
+
+        public async Task<Member?> GetByIdAsync(int id)
+        {
+            return await gymDbContext.Members.FindAsync(id);
+        }
+    }
+}
