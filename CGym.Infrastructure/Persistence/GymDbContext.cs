@@ -11,6 +11,7 @@ namespace CGym.Infrastructure.Persistence
         }
 
         public DbSet<Member> Members { get; set; } // vis member ikke findes så tjekker vi her 
+        public DbSet<User> Users { get; set; }
 
     }
 }
