@@ -4,23 +4,55 @@ using CGym.Infrastructure.Persistence;
 using CGym.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Henter connection string fra appsettings.json
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
+// Database connection
 builder.Services.AddDbContext<GymDbContext>(
     options => options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString))
 );
 
-// DI — fortæller ASP.NET hvilke klasser der bruges
+// ---------------- DI (Dependency Injection) ----------------
+
+// Member system
 builder.Services.AddScoped<IMemberRepository, MemberRepository>();
 builder.Services.AddScoped<IMemberService, MemberService>();
 
-// Add services to the container.
+// User authentication system
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<AuthService>();
 
+// ------------------------------------------------------------
+
+// Add controllers
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+var key = builder.Configuration["Jwt:Key"];
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = false,
+        ValidateAudience = false,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(key))
+    };
+});
+
+// OpenAPI (Scalar UI)
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
@@ -29,13 +61,19 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    app.MapScalarApiReference(); // Swagger UI
+    app.MapScalarApiReference(); // UI til at teste API endpoints
 }
 
 app.UseHttpsRedirection();
 
+
+app.UseAuthentication();
+
+
 app.UseAuthorization();
 
+
 app.MapControllers();
+
 
 app.Run();

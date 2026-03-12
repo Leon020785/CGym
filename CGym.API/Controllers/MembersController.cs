@@ -1,10 +1,13 @@
 ﻿using CGym.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+
 
 namespace CGym.API.Controllers
 {
-    // Håndterer alle HTTP-kald relateret til medlemmer
-    [ApiController]
+    [Authorize]
+    [ApiController]     // Håndterer alle HTTP-kald relateret til medlemmer
+
     [Route("api/[controller]")]
     public class MembersController : ControllerBase
     {
