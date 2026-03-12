@@ -1,6 +1,15 @@
-@CGym.API_HostAddress = http://localhost:5259
+@host = http://localhost:5259/scalar
 
-GET {{CGym.API_HostAddress}}/weatherforecast/
+### Test API
+GET {{host}}/weatherforecast/
 Accept: application/json
 
-###
+### Register user
+POST {{host}}/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "Leon",
+  "email": "leon@test.com",
+  "password": "123456"
+}
