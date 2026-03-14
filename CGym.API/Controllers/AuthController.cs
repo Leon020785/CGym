@@ -26,8 +26,9 @@ namespace CGym.API.Controllers
 
             return Ok("User registered successfully");
         }
+        
+        
         [HttpPost("Login")]
-
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
 
