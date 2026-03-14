@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using CGym.Application.Services;
 using CGym.API.DTOs;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CGym.API.Controllers
 {
+    
     [ApiController]
     [Route("api/auth")]
     public class AuthController : ControllerBase

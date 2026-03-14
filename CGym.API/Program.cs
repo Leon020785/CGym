@@ -34,6 +34,11 @@ builder.Services.AddScoped<AuthService>();
 builder.Services.AddControllers();
 var key = builder.Configuration["Jwt:Key"];
 
+if (string.IsNullOrEmpty(key))
+{
+    throw new Exception("JWT Key is missing in configuration.");
+}
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
