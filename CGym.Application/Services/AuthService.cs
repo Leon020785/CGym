@@ -8,50 +8,43 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
 public class AuthService
+{
+    private readonly IUserRepository _userRepository;
+
+    public AuthService(IUserRepository userRepository)
     {
-        private readonly IUserRepository _userRepository;
+        _userRepository = userRepository;
+    }
 
-        public AuthService(IUserRepository userRepository)
+    public async Task RegisterUserAsync(string username, string email, string password)
+    {
+        var passwordHash = BCrypt.Net.BCrypt.HashPassword(password);
+
+        var user = new User
         {
-            _userRepository = userRepository;
-        }
+            Username = username,
+            Email = email,
+            PasswordHash = passwordHash,
+            CreatedAt = DateTime.UtcNow
+        };
 
-        public async Task RegisterUserAsync(string username, string email, string password)
-        {
-            // Hash password
-            var passwordHash = BCrypt.Net.BCrypt.HashPassword(password);
+        await _userRepository.AddUserAsync(user);
+    }
 
-            // Create user entity
-            var user = new User
-            {
-                Username = username,
-                Email = email,
-                PasswordHash = passwordHash,
-                CreatedAt = DateTime.UtcNow
-            };
-
-            // Save user to database
-            await _userRepository.AddUserAsync(user);
-        }
     public async Task<User?> LoginUserAsync(string email, string password)
     {
         var user = await _userRepository.GetUserByEmailAsync(email);
 
         if (user == null)
-        {
             return null;
-        }
 
         var validPassword = BCrypt.Net.BCrypt.Verify(password, user.PasswordHash);
 
         if (!validPassword)
-        {
             return null;
-        }
 
         return user;
     }
-
 
     public string GenerateJwtToken(User user)
     {
@@ -62,9 +55,9 @@ public class AuthService
 
         var claims = new[]
         {
-        new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-        new Claim(ClaimTypes.Email, user.Email)
-    };
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim(ClaimTypes.Email, user.Email)
+        };
 
         var token = new JwtSecurityToken(
             claims: claims,
@@ -74,8 +67,4 @@ public class AuthService
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
-
-
-
-
 }
