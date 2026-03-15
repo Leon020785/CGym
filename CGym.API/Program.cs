@@ -23,15 +23,25 @@ builder.Services.AddDbContext<GymDbContext>(
 // Member system
 builder.Services.AddScoped<IMemberRepository, MemberRepository>();
 builder.Services.AddScoped<IMemberService, MemberService>();
+builder.Services.AddScoped<IActivityRepository, ActivityRepository>(); 
 
 // User authentication system
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<AuthService>();
 
+// ⭐ BOOKING SYSTEM (DET DU MANGLEDE)
+builder.Services.AddScoped<IBookingRepository, BookingRepository>();
+builder.Services.AddScoped<IActivityRepository, ActivityRepository>();
+builder.Services.AddScoped<ITrainerRepository, TrainerRepository>();
+
+builder.Services.AddScoped<IBookingService, BookingService>();
+
 // ------------------------------------------------------------
+
 
 // Add controllers
 builder.Services.AddControllers();
+
 var key = builder.Configuration["Jwt:Key"];
 
 if (string.IsNullOrEmpty(key))
@@ -66,19 +76,14 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    app.MapScalarApiReference(); // UI til at teste API endpoints
+    app.MapScalarApiReference();
 }
 
 app.UseHttpsRedirection();
 
-
 app.UseAuthentication();
-
-
 app.UseAuthorization();
 
-
 app.MapControllers();
-
 
 app.Run();
