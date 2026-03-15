@@ -10,7 +10,7 @@ namespace CGym.Application.Interfaces
         Task<IEnumerable<Trainer>> GetTrainersAsync();
         // Henter alle trænere fra databasen
 
-        Task<Trainer?> GetTrainerAsync();
+        Task<Trainer?> GetTrainerAsync(int id);
         // Henter én træner baseret på ID
 
         Task AddAsync(Trainer trainer);

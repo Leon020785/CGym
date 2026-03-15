@@ -1,4 +1,6 @@
-﻿namespace CGym.Domain.Entities
+﻿using System.Collections.Generic;
+
+namespace CGym.Domain.Entities
 {
     public class Trainer
     {
@@ -7,5 +9,6 @@
         public string Name { get; set; }
 
         public ICollection<Activity> Activities { get; set; }
+        // En træner kan have mange aktiviteter
     }
 }
