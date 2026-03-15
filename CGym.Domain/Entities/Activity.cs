@@ -1,4 +1,7 @@
-﻿namespace CGym.Domain.Entities
+﻿using System.Collections.Generic;
+using System;
+
+namespace CGym.Domain.Entities
 {
     public class Activity
     {
@@ -13,5 +16,9 @@
         public int TrainerId { get; set; }
 
         public Trainer Trainer { get; set; }
+        // navigation property til trainer
+
+        public ICollection<Booking> Bookings { get; set; }
+        // List over alle bookings til denne aktivitet
     }
 }
