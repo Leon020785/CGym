@@ -2,5 +2,6 @@
   <Project Path="CGym.API/CGym.API.csproj" />
   <Project Path="CGym.Application/CGym.Application.csproj" />
   <Project Path="CGym.Domain/CGym.Domain.csproj" />
+  <Project Path="CGym.Frontend/CGym.Frontend.csproj" Id="0a39550d-7d76-427f-80a0-cb18dde67286" />
   <Project Path="CGym.Infrastructure/CGym.Infrastructure.csproj" />
 </Solution>
