@@ -1,0 +1,209 @@
+﻿@page "/bookinger"
+@rendermode InteractiveServer
+
+<div class="bookinger-wrapper">
+    <div class="page-header">
+        <a href="/" class="back-btn">←</a>
+        <h2 class="page-title">Mine bookinger</h2>
+    </div>
+    <p class="page-sub">Du har @bookinger.Count kommende bookinger</p>
+
+    <div class="booking-list">
+        @foreach (var booking in bookinger)
+        {
+            <div class="booking-card" style="border-top: 4px solid @booking.Color">
+                <div class="booking-top">
+                    <div class="booking-name">@booking.Name</div>
+                    <button class="btn-close" @onclick="() => AflysBooking(booking)">✕</button>
+                </div>
+                <div class="booking-detail">👤 @booking.Instructor</div>
+                <div class="booking-detail">📅 @booking.Date</div>
+                <div class="booking-detail">🕐 @booking.Time</div>
+                <button class="btn-aflys" @onclick="() => AflysBooking(booking)">
+                    Aflys booking
+                </button>
+            </div>
+        }
+
+        @if (bookinger.Count == 0)
+        {
+            <div class="empty-state">
+                <p>📭 Du har ingen bookinger endnu</p>
+                <a href="/aktiviteter" class="btn-find">Find aktiviteter</a>
+            </div>
+        }
+    </div>
+
+    @if (!string.IsNullOrEmpty(message))
+    {
+        <div class="toast @(showToast ? "show" : "")">@message</div>
+    }
+</div>
+
+<style>
+    .bookinger-wrapper {
+        padding: 24px 16px;
+        max-width: 800px;
+        margin: 0 auto;
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    .page-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 4px;
+    }
+
+    .back-btn {
+        font-size: 20px;
+        color: #111827;
+        text-decoration: none;
+    }
+
+    .page-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: #111827;
+        margin: 0;
+    }
+
+    .page-sub {
+        color: #6b7280;
+        font-size: 14px;
+        margin: 0 0 20px 0;
+    }
+
+    .booking-list {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .booking-card {
+        background: white;
+        border-radius: 14px;
+        padding: 20px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .booking-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .booking-name {
+        font-size: 17px;
+        font-weight: 700;
+        color: #111827;
+    }
+
+    .btn-close {
+        background: none;
+        border: none;
+        font-size: 16px;
+        color: #9ca3af;
+        cursor: pointer;
+        padding: 4px 8px;
+        border-radius: 6px;
+        transition: color 0.2s;
+    }
+
+        .btn-close:hover {
+            color: #ef4444;
+        }
+
+    .booking-detail {
+        font-size: 13px;
+        color: #6b7280;
+    }
+
+    .btn-aflys {
+        width: 100%;
+        padding: 12px;
+        background: white;
+        color: #ef4444;
+        border: 1.5px solid #ef4444;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 4px;
+        transition: all 0.2s;
+    }
+
+        .btn-aflys:hover {
+            background: #ef4444;
+            color: white;
+        }
+
+    .empty-state {
+        text-align: center;
+        padding: 48px 16px;
+        color: #6b7280;
+        font-size: 15px;
+    }
+
+    .btn-find {
+        display: inline-block;
+        margin-top: 16px;
+        background: #16a34a;
+        color: white;
+        padding: 12px 24px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .toast {
+        position: fixed;
+        bottom: 24px;
+        left: 50%;
+        transform: translateX(-50%) translateY(20px);
+        background: #111827;
+        color: white;
+        padding: 12px 24px;
+        border-radius: 10px;
+        font-size: 14px;
+        opacity: 0;
+        transition: all 0.3s;
+        pointer-events: none;
+    }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+</style>
+
+@code {
+    private string message = "";
+    private bool showToast = false;
+
+    private List<BookingItem> bookinger = new()
+    {
+        new("HIIT Training", "Sarah Johnson", "16. marts 2026", "9:00 - 10:00", "#ef4444"),
+        new("Yoga Flow", "Michael Chen", "17. marts 2026", "10:30 - 11:30", "#a855f7"),
+        new("Styrketræning", "David Martinez", "18. marts 2026", "12:00 - 13:00", "#3b82f6"),
+        new("Spinning", "Emma Wilson", "19. marts 2026", "14:00 - 15:00", "#f59e0b"),
+        new("Boksning", "James Brown", "20. marts 2026", "16:00 - 17:00", "#22c55e"),
+    };
+
+    private async Task AflysBooking(BookingItem booking)
+    {
+        bookinger.Remove(booking);
+        message = $"❌ {booking.Name} er aflyst";
+        showToast = true;
+        StateHasChanged();
+        await Task.Delay(3000);
+        showToast = false;
+        message = "";
+        StateHasChanged();
+    }
+
+    private record BookingItem(string Name, string Instructor, string Date, string Time, string Color);
+}
