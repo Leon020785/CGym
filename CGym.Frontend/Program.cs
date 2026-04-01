@@ -1,4 +1,5 @@
 using CGym.Frontend.Components;
+using CGym.Frontend.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +11,9 @@ builder.Services.AddHttpClient("API", client =>
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+builder.Services.AddScoped<MemberService>();
+builder.Services.AddScoped<AuthService>();
 
 var app = builder.Build();
 
@@ -27,6 +31,6 @@ app.UseAntiforgery();
 
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode();
+   .AddInteractiveServerRenderMode();
 
 app.Run();

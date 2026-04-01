@@ -5,3 +5,26 @@
 <h1>Hello, world!</h1>
 
 Welcome to your new app.
+
+@inject CGym.Frontend.Services.MemberService MemberService
+
+<h3>Test Members</h3>
+
+<button @onclick="LoadMembers">Load Members</button>
+
+@if (members != null)
+{
+    foreach (var m in members)
+    {
+        <p>@m.FirstName</p>
+    }
+}
+
+@code {
+    List<CGym.Frontend.Models.Member> members;
+
+    async Task LoadMembers()
+    {
+        members = await MemberService.GetMembersAsync();
+    }
+}
