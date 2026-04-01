@@ -31,5 +31,16 @@ namespace CGym.Frontend.Services
 
             return true;
         }
+
+        public async Task<bool> Register(string username, string email, string password)
+        {
+            var response = await _http.PostAsJsonAsync("api/auth/register", new
+            {
+                username,
+                email,
+                password
+            });
+            return response.IsSuccessStatusCode;
+        }
     }
 }
