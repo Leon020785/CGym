@@ -1,0 +1,187 @@
+﻿@page "/aktiviteter"
+@rendermode InteractiveServer
+
+<div class="aktiviteter-wrapper">
+    <div class="page-header">
+        <a href="/" class="back-btn">← </a>
+        <h2 class="page-title">Aktiviteter</h2>
+    </div>
+    <p class="page-sub">Find og book dine yndlings træningshold</p>
+
+    <div class="activity-list">
+        @foreach (var activity in activities)
+        {
+            <div class="activity-card" style="border-top: 4px solid @activity.Color">
+                <div class="activity-top">
+                    <div>
+                        <div class="activity-name">@activity.Name</div>
+                        <div class="activity-instructor">👤 @activity.Instructor</div>
+                    </div>
+                    <div class="activity-spots" style="color: @activity.Color">
+                        @activity.SpotsLeft pladser
+                    </div>
+                </div>
+                <div class="activity-info">
+                    <span>🕐 @activity.Time</span>
+                    <span>👥 @activity.Enrolled/@activity.Capacity</span>
+                </div>
+                <button class="btn-book" @onclick="() => BookHold(activity.Name)">
+                    Book hold
+                </button>
+            </div>
+        }
+    </div>
+
+    @if (!string.IsNullOrEmpty(message))
+    {
+        <div class="toast @(showToast ? "show" : "")">@message</div>
+    }
+</div>
+
+<style>
+    .aktiviteter-wrapper {
+        padding: 24px 16px;
+        max-width: 800px;
+        margin: 0 auto;
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    .page-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 4px;
+    }
+
+    .back-btn {
+        font-size: 20px;
+        color: #111827;
+        text-decoration: none;
+    }
+
+    .page-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: #111827;
+        margin: 0;
+    }
+
+    .page-sub {
+        color: #6b7280;
+        font-size: 14px;
+        margin: 0 0 20px 0;
+    }
+
+    .activity-list {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .activity-card {
+        background: white;
+        border-radius: 14px;
+        padding: 20px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .activity-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+    }
+
+    .activity-name {
+        font-size: 17px;
+        font-weight: 700;
+        color: #111827;
+    }
+
+    .activity-instructor {
+        font-size: 13px;
+        color: #6b7280;
+        margin-top: 4px;
+    }
+
+    .activity-spots {
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .activity-info {
+        display: flex;
+        gap: 16px;
+        font-size: 13px;
+        color: #6b7280;
+    }
+
+    .btn-book {
+        width: 100%;
+        padding: 14px;
+        background: #16a34a;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+        .btn-book:hover {
+            background: #15803d;
+        }
+
+    .toast {
+        position: fixed;
+        bottom: 24px;
+        left: 50%;
+        transform: translateX(-50%) translateY(20px);
+        background: #111827;
+        color: white;
+        padding: 12px 24px;
+        border-radius: 10px;
+        font-size: 14px;
+        opacity: 0;
+        transition: all 0.3s;
+        pointer-events: none;
+    }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+</style>
+
+@code {
+    private string message = "";
+    private bool showToast = false;
+
+    private List<ActivityItem> activities = new()
+    {
+        new("HIIT Training", "Sarah Johnson", "9:00 - 10:00", 15, 12, "#ef4444"),
+        new("Yoga Flow", "Michael Chen", "10:30 - 11:30", 20, 8, "#a855f7"),
+        new("Styrketræning", "David Martinez", "12:00 - 13:00", 12, 10, "#3b82f6"),
+        new("Spinning", "Emma Wilson", "14:00 - 15:00", 18, 15, "#f59e0b"),
+        new("Boksning", "James Brown", "16:00 - 17:00", 10, 9, "#22c55e"),
+    };
+
+    private async Task BookHold(string name)
+    {
+        message = $"✅ Du har booket {name}!";
+        showToast = true;
+        StateHasChanged();
+        await Task.Delay(3000);
+        showToast = false;
+        message = "";
+        StateHasChanged();
+    }
+
+    private record ActivityItem(string Name, string Instructor, string Time, int Capacity, int Enrolled, string Color)
+    {
+        public int SpotsLeft => Capacity - Enrolled;
+    }
+}
