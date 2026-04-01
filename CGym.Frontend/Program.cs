@@ -12,8 +12,8 @@ builder.Services.AddHttpClient("API", client =>
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+builder.Services.AddSingleton<AuthService>();  // Token overlever på tværs af requests
 builder.Services.AddScoped<MemberService>();
-builder.Services.AddScoped<AuthService>();
 
 var app = builder.Build();
 

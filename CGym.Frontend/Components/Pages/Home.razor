@@ -1,30 +1,69 @@
 ﻿@page "/"
-
-<PageTitle>Home</PageTitle>
-
-<h1>Hello, world!</h1>
-
-Welcome to your new app.
-
+@rendermode InteractiveServer
 @inject CGym.Frontend.Services.MemberService MemberService
+@inject CGym.Frontend.Services.AuthService Auth
 
-<h3>Test Members</h3>
+<p>Token: @Auth.Token</p>
 
+<h3>Create Member</h3>
+<input @bind="firstName" placeholder="First name" />
+<br />
+<input @bind="lastName" placeholder="Last name" />
+<br />
+<input @bind="email" placeholder="Email" />
+<br />
+<br />
+<button @onclick="CreateMember">Create Member</button>
+<p>@message</p>
+<hr />
+<h3>Members</h3>
 <button @onclick="LoadMembers">Load Members</button>
-
 @if (members != null)
 {
     foreach (var m in members)
     {
-        <p>@m.FirstName</p>
+        <p>@m.FirstName @m.LastName (@m.Email)</p>
     }
 }
 
 @code {
-    List<CGym.Frontend.Models.Member> members;
+    string firstName = "";
+    string lastName = "";
+    string email = "";
+    string message = "";
+    List<CGym.Frontend.Models.Member>? members;
+
+    async Task CreateMember()
+    {
+        if (string.IsNullOrEmpty(Auth.Token))
+        {
+            message = "Du er ikke logget ind. Gå til /login først.";
+            return;
+        }
+
+        try
+        {
+            await MemberService.CreateMemberAsync(firstName, lastName, email);
+            message = "Member oprettet 🔥";
+            firstName = "";
+            lastName = "";
+            email = "";
+        }
+        catch (Exception ex)
+        {
+            message = $"Fejl: {ex.Message}";
+        }
+    }
 
     async Task LoadMembers()
     {
-        members = await MemberService.GetMembersAsync();
+        try
+        {
+            members = await MemberService.GetMembersAsync();
+        }
+        catch (Exception ex)
+        {
+            message = $"Fejl ved hentning: {ex.Message}";
+        }
     }
 }

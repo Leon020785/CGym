@@ -1,4 +1,5 @@
 ﻿using System.Net.Http.Json;
+using CGym.Frontend.Models;
 
 namespace CGym.Frontend.Services
 {
@@ -15,10 +16,10 @@ namespace CGym.Frontend.Services
 
         public async Task<bool> Login(string email, string password)
         {
-            var response = await _http.PostAsJsonAsync("api/auth/login", new
+            var response = await _http.PostAsJsonAsync("api/auth/Login", new
             {
-                email = email,
-                password = password
+                email,
+                password
             });
 
             if (!response.IsSuccessStatusCode)
@@ -29,11 +30,6 @@ namespace CGym.Frontend.Services
             Token = result?.Token;
 
             return true;
-        }
-
-        private class LoginResponse
-        {
-            public string Token { get; set; }
         }
     }
 }
