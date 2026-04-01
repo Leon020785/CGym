@@ -1,0 +1,42 @@
+﻿@page "/login"
+@rendermode InteractiveServer
+@inject CGym.Frontend.Services.AuthService AuthService
+@inject NavigationManager Nav
+
+<h3>Login</h3>
+
+<input @bind="email" placeholder="Email" />
+<br />
+<input @bind="password" type="password" placeholder="Password" />
+<br />
+<br />
+
+<button @onclick="HandleLogin">Login</button>
+
+<p>@message</p>
+
+@code {
+    private string email = "";
+    private string password = "";
+    private string message = "";
+
+    private void TestClick()
+    {
+        Console.WriteLine("KNAP VIRKER");
+    }
+
+    private async Task HandleLogin()
+    {
+        var success = await AuthService.Login(email, password);
+
+        if (success)
+        {
+            message = "Login success!";
+            Nav.NavigateTo("/");
+        }
+        else
+        {
+            message = "Login failed!";
+        }
+    }
+}
