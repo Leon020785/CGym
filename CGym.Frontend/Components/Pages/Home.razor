@@ -1,69 +1,344 @@
 ﻿@page "/"
 @rendermode InteractiveServer
-@inject CGym.Frontend.Services.MemberService MemberService
 @inject CGym.Frontend.Services.AuthService Auth
+@inject NavigationManager Nav
 
-<p>Token: @Auth.Token</p>
-
-<h3>Create Member</h3>
-<input @bind="firstName" placeholder="First name" />
-<br />
-<input @bind="lastName" placeholder="Last name" />
-<br />
-<input @bind="email" placeholder="Email" />
-<br />
-<br />
-<button @onclick="CreateMember">Create Member</button>
-<p>@message</p>
-<hr />
-<h3>Members</h3>
-<button @onclick="LoadMembers">Load Members</button>
-@if (members != null)
+@if (!string.IsNullOrEmpty(Auth.Token))
 {
-    foreach (var m in members)
-    {
-        <p>@m.FirstName @m.LastName (@m.Email)</p>
-    }
+    <div class="dashboard">
+        <!-- Header -->
+        <div class="header">
+            <h2 class="welcome-title">Velkommen tilbage!</h2>
+            <p class="welcome-sub">Klar til at træne i dag?</p>
+        </div>
+
+        <!-- Hero banner -->
+        <div class="hero-banner">
+            <div class="hero-text">
+                <p class="quote">"Din krop kan alt - det er dit hoved du skal overbevise"</p>
+                <span class="hero-link">Bliv stærkere hver dag 💪</span>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card green">
+                <span class="stat-icon">📅</span>
+                <div class="stat-number">5</div>
+                <div class="stat-label">Aktive bookinger</div>
+            </div>
+            <div class="stat-card white">
+                <span class="stat-icon">📋</span>
+                <div class="stat-number">12</div>
+                <div class="stat-label">Hold tilgængelige</div>
+            </div>
+        </div>
+
+        <!-- Ugens mester banner -->
+        <div class="champion-banner">
+            <span class="champion-icon">🏆</span>
+            <div>
+                <div class="champion-title">Ugens mester! 🎉</div>
+                <div class="champion-sub">Du har deltaget i 8 hold denne uge</div>
+            </div>
+        </div>
+
+        <!-- Knapper -->
+        <a href="/aktiviteter" class="btn-full-green">
+            📅 Se alle aktiviteter
+        </a>
+        <a href="/bookinger" class="btn-full-outline">
+            📋 Mine bookinger
+        </a>
+
+        <!-- Fremskridt -->
+        <div class="progress-card">
+            <div class="progress-title">📈 Dine fremskridt</div>
+            <div class="progress-row">
+                <span>Hold i denne måned</span>
+                <span class="progress-value">24</span>
+            </div>
+            <div class="progress-row">
+                <span>Total træningsdage</span>
+                <span class="progress-value">87</span>
+            </div>
+            <div class="progress-row">
+                <span>Favorit aktivitet</span>
+                <span class="progress-value green-text">HIIT Training</span>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="not-logged-in">
+        <div class="logo-icon">
+            <svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="28" cy="28" r="26" stroke="white" stroke-width="2" fill="none" />
+                <circle cx="28" cy="28" r="20" stroke="white" stroke-width="1" fill="none" />
+                <circle cx="28" cy="16" r="3" fill="white" />
+                <path d="M22 20 Q28 19 34 20 L32 30 H24 Z" fill="white" />
+                <path d="M22 20 L16 24 Q14 26 16 28 L20 26 L22 24" fill="white" />
+                <path d="M34 20 L40 24 Q42 26 40 28 L36 26 L34 24" fill="white" />
+                <path d="M24 30 L22 40 L26 40 L28 34 L30 40 L34 40 L32 30" fill="white" />
+                <path id="topArc2" d="M 10,28 A 18,18 0 0,1 46,28" fill="none" />
+                <text font-size="5" fill="white" font-family="serif" font-weight="bold" letter-spacing="1">
+                    <textPath href="#topArc2" startOffset="10%">— CGYM FITNESS —</textPath>
+                </text>
+                <path id="bottomArc2" d="M 10,28 A 18,18 0 0,0 46,28" fill="none" />
+                <text font-size="4.5" fill="white" font-family="serif" letter-spacing="1">
+                    <textPath href="#bottomArc2" startOffset="15%">SINCE 2025</textPath>
+                </text>
+            </svg>
+        </div>
+        <h1 class="brand">CGym</h1>
+        <p class="subtitle">Log ind for at se dit dashboard</p>
+        <a href="/login" class="btn-login-link">Log ind</a>
+        <a href="/register" class="btn-register-link">Opret konto</a>
+    </div>
 }
 
-@code {
-    string firstName = "";
-    string lastName = "";
-    string email = "";
-    string message = "";
-    List<CGym.Frontend.Models.Member>? members;
-
-    async Task CreateMember()
-    {
-        if (string.IsNullOrEmpty(Auth.Token))
-        {
-            message = "Du er ikke logget ind. Gå til /login først.";
-            return;
-        }
-
-        try
-        {
-            await MemberService.CreateMemberAsync(firstName, lastName, email);
-            message = "Member oprettet 🔥";
-            firstName = "";
-            lastName = "";
-            email = "";
-        }
-        catch (Exception ex)
-        {
-            message = $"Fejl: {ex.Message}";
-        }
+<style>
+    .dashboard {
+        padding: 24px 16px;
+        max-width: 800px;
+        margin: 0 auto;
+        font-family: 'Segoe UI', sans-serif;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
     }
 
-    async Task LoadMembers()
-    {
-        try
-        {
-            members = await MemberService.GetMembersAsync();
-        }
-        catch (Exception ex)
-        {
-            message = $"Fejl ved hentning: {ex.Message}";
-        }
+    .header {
+        margin-bottom: 4px;
     }
-}
+
+    .welcome-title {
+        font-size: 28px;
+        font-weight: 700;
+        color: #111827;
+        margin: 0;
+    }
+
+    .welcome-sub {
+        color: #6b7280;
+        margin: 4px 0 0 0;
+        font-size: 15px;
+    }
+
+    .hero-banner {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+        border-radius: 16px;
+        padding: 32px 24px;
+        min-height: 140px;
+        display: flex;
+        align-items: flex-end;
+    }
+
+    .quote {
+        color: white;
+        font-size: 16px;
+        font-weight: 500;
+        margin: 0 0 6px 0;
+    }
+
+    .hero-link {
+        color: #4ade80;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
+    .stat-card {
+        border-radius: 14px;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+        .stat-card.green {
+            background: #16a34a;
+            color: white;
+        }
+
+        .stat-card.white {
+            background: white;
+            border: 1.5px solid #e5e7eb;
+            color: #111827;
+        }
+
+    .stat-icon {
+        font-size: 20px;
+    }
+
+    .stat-number {
+        font-size: 32px;
+        font-weight: 700;
+    }
+
+    .stat-label {
+        font-size: 13px;
+        opacity: 0.85;
+    }
+
+    .champion-banner {
+        background: linear-gradient(90deg, #f59e0b 0%, #f97316 100%);
+        border-radius: 14px;
+        padding: 16px 20px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        color: white;
+    }
+
+    .champion-icon {
+        font-size: 28px;
+    }
+
+    .champion-title {
+        font-weight: 700;
+        font-size: 16px;
+    }
+
+    .champion-sub {
+        font-size: 13px;
+        opacity: 0.9;
+    }
+
+    .btn-full-green {
+        display: block;
+        text-align: center;
+        background: #16a34a;
+        color: white;
+        padding: 16px;
+        border-radius: 12px;
+        font-size: 15px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: background 0.2s;
+    }
+
+        .btn-full-green:hover {
+            background: #15803d;
+            color: white;
+        }
+
+    .btn-full-outline {
+        display: block;
+        text-align: center;
+        background: white;
+        color: #111827;
+        padding: 16px;
+        border-radius: 12px;
+        font-size: 15px;
+        font-weight: 600;
+        text-decoration: none;
+        border: 1.5px solid #e5e7eb;
+        transition: border-color 0.2s;
+    }
+
+        .btn-full-outline:hover {
+            border-color: #16a34a;
+            color: #16a34a;
+        }
+
+    .progress-card {
+        background: white;
+        border-radius: 14px;
+        padding: 20px;
+        border: 1.5px solid #e5e7eb;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .progress-title {
+        font-weight: 700;
+        font-size: 16px;
+        color: #111827;
+    }
+
+    .progress-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 14px;
+        color: #374151;
+        border-bottom: 1px solid #f3f4f6;
+        padding-bottom: 8px;
+    }
+
+    .progress-value {
+        font-weight: 600;
+    }
+
+    .green-text {
+        color: #16a34a;
+    }
+
+    /* Ikke logget ind */
+    .not-logged-in {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 50%, #bbf7d0 100%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    .logo-icon {
+        background: #16a34a;
+        border-radius: 16px;
+        width: 90px;
+        height: 90px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .brand {
+        font-size: 28px;
+        font-weight: 700;
+        color: #111827;
+        margin: 0;
+    }
+
+    .subtitle {
+        color: #6b7280;
+        font-size: 15px;
+        margin: 0;
+    }
+
+    .btn-login-link {
+        width: 300px;
+        text-align: center;
+        background: #16a34a;
+        color: white;
+        padding: 14px;
+        border-radius: 10px;
+        font-size: 16px;
+        font-weight: 600;
+        text-decoration: none;
+        margin-top: 8px;
+    }
+
+    .btn-register-link {
+        width: 300px;
+        text-align: center;
+        background: white;
+        color: #16a34a;
+        padding: 14px;
+        border-radius: 10px;
+        font-size: 16px;
+        font-weight: 600;
+        text-decoration: none;
+        border: 2px solid #16a34a;
+    }
+</style>
