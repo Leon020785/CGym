@@ -1,30 +1,194 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">CGym.Frontend</a>
+﻿@inject CGym.Frontend.Services.AuthService Auth
+@inject NavigationManager Nav
+
+<nav class="top-nav">
+    <a href="/" class="nav-brand">💪 CGym</a>
+
+    <!-- Hamburger knap (mobil) -->
+    <button class="hamburger" @onclick="ToggleMenu">
+        @if (menuOpen)
+        {
+            <span>✕</span>
+        }
+        else
+        {
+            <span>☰</span>
+        }
+    </button>
+
+    <!-- Desktop links -->
+    <div class="nav-links desktop">
+        <NavLink href="/" Match="NavLinkMatch.All" class="nav-item">🏠 Home</NavLink>
+        <NavLink href="/aktiviteter" class="nav-item">📋 Aktiviteter</NavLink>
+        <NavLink href="/bookinger" class="nav-item">📅 Bookinger</NavLink>
+        @if (!string.IsNullOrEmpty(Auth.Token))
+        {
+            <NavLink href="/admin" class="nav-item">⚙️ Admin</NavLink>
+            <button class="btn-logout" @onclick="Logout">Log ud</button>
+        }
+        else
+        {
+            <NavLink href="/login" class="nav-item">🔑 Log ind</NavLink>
+        }
     </div>
-</div>
+</nav>
 
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+<!-- Mobil dropdown menu -->
+@if (menuOpen)
+{
+    <div class="mobile-menu">
+        <NavLink href="/" Match="NavLinkMatch.All" class="mobile-item" @onclick="CloseMenu">🏠 Home</NavLink>
+        <NavLink href="/aktiviteter" class="mobile-item" @onclick="CloseMenu">📋 Aktiviteter</NavLink>
+        <NavLink href="/bookinger" class="mobile-item" @onclick="CloseMenu">📅 Bookinger</NavLink>
+        @if (!string.IsNullOrEmpty(Auth.Token))
+        {
+            <NavLink href="/admin" class="mobile-item" @onclick="CloseMenu">⚙️ Admin</NavLink>
+            <button class="mobile-logout" @onclick="Logout">Log ud</button>
+        }
+        else
+        {
+            <NavLink href="/login" class="mobile-item" @onclick="CloseMenu">🔑 Log ind</NavLink>
+        }
+    </div>
+}
 
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="nav flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
+<style>
+    .top-nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 24px;
+        height: 60px;
+        background: white;
+        border-bottom: 1.5px solid #e5e7eb;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+    }
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
-            </NavLink>
-        </div>
+    .nav-brand {
+        font-size: 20px;
+        font-weight: 700;
+        color: #16a34a;
+        text-decoration: none;
+    }
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="weather">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
-            </NavLink>
-        </div>
-    </nav>
-</div>
+    .nav-links.desktop {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
 
+    .nav-item {
+        padding: 8px 14px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        color: #374151;
+        text-decoration: none;
+        transition: background 0.2s;
+    }
+
+        .nav-item:hover, .nav-item.active {
+            background: #f0fdf4;
+            color: #16a34a;
+            font-weight: 600;
+        }
+
+    .btn-logout {
+        padding: 8px 16px;
+        background: #ef4444;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+        .btn-logout:hover {
+            background: #dc2626;
+        }
+
+    /* Hamburger */
+    .hamburger {
+        display: none;
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: #111827;
+        padding: 4px 8px;
+    }
+
+    /* Mobil dropdown */
+    .mobile-menu {
+        display: none;
+        flex-direction: column;
+        background: white;
+        border-bottom: 1.5px solid #e5e7eb;
+        padding: 8px 16px 16px 16px;
+        position: sticky;
+        top: 60px;
+        z-index: 99;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .mobile-item {
+        padding: 14px 16px;
+        font-size: 15px;
+        font-weight: 500;
+        color: #374151;
+        text-decoration: none;
+        border-radius: 10px;
+        transition: background 0.2s;
+    }
+
+        .mobile-item:hover, .mobile-item.active {
+            background: #f0fdf4;
+            color: #16a34a;
+        }
+
+    .mobile-logout {
+        margin-top: 8px;
+        padding: 14px 16px;
+        background: #ef4444;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 15px;
+        font-weight: 500;
+        cursor: pointer;
+        text-align: left;
+    }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .nav-links.desktop {
+            display: none;
+        }
+
+        .hamburger {
+            display: block;
+        }
+
+        .mobile-menu {
+            display: flex;
+        }
+    }
+</style>
+
+@code {
+    private bool menuOpen = false;
+
+    private void ToggleMenu() => menuOpen = !menuOpen;
+    private void CloseMenu() => menuOpen = false;
+
+    private void Logout()
+    {
+        Auth.Logout();
+        menuOpen = false;
+        Nav.NavigateTo("/login");
+    }
+}

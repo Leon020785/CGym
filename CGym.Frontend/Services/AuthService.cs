@@ -42,5 +42,9 @@ namespace CGym.Frontend.Services
             });
             return response.IsSuccessStatusCode;
         }
+        public void Logout()
+        {
+            Token = null;
+        }
     }
 }
