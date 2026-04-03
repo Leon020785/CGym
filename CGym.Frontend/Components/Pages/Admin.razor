@@ -1,0 +1,357 @@
+﻿@page "/admin"
+@rendermode InteractiveServer
+
+<div class="admin-wrapper">
+    <div class="page-header">
+        <a href="/" class="back-btn">←</a>
+        <h2 class="page-title">Admin Panel</h2>
+    </div>
+
+    <!-- Hero banner -->
+    <div class="hero-banner">
+        <p class="hero-text">Administrer dine hold og aktiviteter</p>
+    </div>
+
+    <!-- Opret aktivitet -->
+    <div class="create-card">
+        <div class="create-header">
+            <div class="create-icon">+</div>
+            <h3 class="create-title">Opret ny aktivitet</h3>
+        </div>
+
+        <div class="form-group">
+            <label>Aktivitetsnavn</label>
+            <input @bind="navn" placeholder="f.eks. HIIT Training" class="input-field" />
+        </div>
+
+        <div class="form-group">
+            <label>Instruktør</label>
+            <input @bind="instruktør" placeholder="f.eks. Sarah Johnson" class="input-field" />
+        </div>
+
+        <div class="form-group">
+            <label>Tidspunkt</label>
+            <input @bind="tidspunkt" placeholder="f.eks. 9:00 - 10:00" class="input-field" />
+        </div>
+
+        <div class="form-group">
+            <label>Kapacitet</label>
+            <input @bind="kapacitet" placeholder="f.eks. 15" class="input-field" type="number" />
+        </div>
+
+        @if (!string.IsNullOrEmpty(message))
+        {
+            <p class="@(success ? "success-msg" : "error-msg")">@message</p>
+        }
+
+        <button class="btn-opret" @onclick="OpretAktivitet">
+            + Opret aktivitet
+        </button>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+        <div class="stat-card blue">
+            <span class="stat-icon">📈</span>
+            <div class="stat-number">@totalAktiviteter</div>
+            <div class="stat-label">Totale aktiviteter</div>
+        </div>
+        <div class="stat-card pink">
+            <span class="stat-icon">👥</span>
+            <div class="stat-number">@totalBookinger</div>
+            <div class="stat-label">Totale bookinger</div>
+        </div>
+    </div>
+
+    <!-- Aktivitetsliste -->
+    @if (aktiviteter.Count > 0)
+    {
+        <div class="activity-list">
+            <h3 class="list-title">Oprettede aktiviteter</h3>
+            @foreach (var a in aktiviteter)
+            {
+                <div class="activity-item">
+                    <div>
+                        <div class="activity-name">@a.Navn</div>
+                        <div class="activity-detail">👤 @a.Instruktør · 🕐 @a.Tidspunkt · 👥 0/@a.Kapacitet</div>
+                    </div>
+                    <button class="btn-delete" @onclick="() => SletAktivitet(a)">✕</button>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<style>
+    .admin-wrapper {
+        padding: 24px 16px;
+        max-width: 800px;
+        margin: 0 auto;
+        font-family: 'Segoe UI', sans-serif;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .page-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .back-btn {
+        font-size: 20px;
+        color: #111827;
+        text-decoration: none;
+    }
+
+    .page-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: #111827;
+        margin: 0;
+    }
+
+    .hero-banner {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+        border-radius: 16px;
+        padding: 40px 24px;
+        min-height: 120px;
+        display: flex;
+        align-items: flex-end;
+    }
+
+    .hero-text {
+        color: white;
+        font-size: 16px;
+        font-weight: 500;
+        margin: 0;
+    }
+
+    .create-card {
+        background: white;
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .create-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 4px;
+    }
+
+    .create-icon {
+        background: #16a34a;
+        color: white;
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        font-weight: 700;
+    }
+
+    .create-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #111827;
+        margin: 0;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+        .form-group label {
+            font-size: 14px;
+            font-weight: 500;
+            color: #374151;
+        }
+
+    .input-field {
+        width: 100%;
+        padding: 12px 16px;
+        border: 1.5px solid #e5e7eb;
+        border-radius: 10px;
+        font-size: 15px;
+        outline: none;
+        transition: border-color 0.2s;
+        box-sizing: border-box;
+    }
+
+        .input-field:focus {
+            border-color: #16a34a;
+        }
+
+    .btn-opret {
+        width: 100%;
+        padding: 14px;
+        background: #16a34a;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
+        margin-top: 4px;
+    }
+
+        .btn-opret:hover {
+            background: #15803d;
+        }
+
+    .success-msg {
+        color: #16a34a;
+        font-size: 14px;
+        margin: 0;
+    }
+
+    .error-msg {
+        color: #ef4444;
+        font-size: 14px;
+        margin: 0;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
+    .stat-card {
+        border-radius: 14px;
+        padding: 24px 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        color: white;
+    }
+
+        .stat-card.blue {
+            background: linear-gradient(135deg, #3b82f6, #6366f1);
+        }
+
+        .stat-card.pink {
+            background: linear-gradient(135deg, #a855f7, #ec4899);
+        }
+
+    .stat-icon {
+        font-size: 22px;
+    }
+
+    .stat-number {
+        font-size: 36px;
+        font-weight: 700;
+    }
+
+    .stat-label {
+        font-size: 13px;
+        opacity: 0.9;
+    }
+
+    .activity-list {
+        background: white;
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .list-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: #111827;
+        margin: 0 0 4px 0;
+    }
+
+    .activity-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px;
+        background: #f9fafb;
+        border-radius: 10px;
+    }
+
+    .activity-name {
+        font-size: 15px;
+        font-weight: 600;
+        color: #111827;
+    }
+
+    .activity-detail {
+        font-size: 12px;
+        color: #6b7280;
+        margin-top: 4px;
+    }
+
+    .btn-delete {
+        background: none;
+        border: none;
+        color: #9ca3af;
+        font-size: 16px;
+        cursor: pointer;
+        padding: 4px 8px;
+        border-radius: 6px;
+        transition: color 0.2s;
+    }
+
+        .btn-delete:hover {
+            color: #ef4444;
+        }
+</style>
+
+@code {
+    private string navn = "";
+    private string instruktør = "";
+    private string tidspunkt = "";
+    private int kapacitet = 0;
+    private string message = "";
+    private bool success = false;
+    private int totalAktiviteter = 12;
+    private int totalBookinger = 48;
+
+    private List<AktivitetItem> aktiviteter = new();
+
+    private void OpretAktivitet()
+    {
+        if (string.IsNullOrWhiteSpace(navn) || string.IsNullOrWhiteSpace(instruktør) ||
+            string.IsNullOrWhiteSpace(tidspunkt) || kapacitet <= 0)
+        {
+            success = false;
+            message = "Udfyld alle felter korrekt.";
+            return;
+        }
+
+        aktiviteter.Add(new AktivitetItem(navn, instruktør, tidspunkt, kapacitet));
+        totalAktiviteter++;
+        success = true;
+        message = $"✅ {navn} er oprettet!";
+        navn = "";
+        instruktør = "";
+        tidspunkt = "";
+        kapacitet = 0;
+    }
+
+    private void SletAktivitet(AktivitetItem a)
+    {
+        aktiviteter.Remove(a);
+        totalAktiviteter--;
+        message = $"❌ {a.Navn} er slettet";
+        success = false;
+    }
+
+    private record AktivitetItem(string Navn, string Instruktør, string Tidspunkt, int Kapacitet);
+}
