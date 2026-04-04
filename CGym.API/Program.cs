@@ -7,6 +7,7 @@ using Scalar.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using CGym.API.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -88,6 +89,7 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 
+app.UseMiddleware<GlobalExceptionMiddleware>();
 app.UseCors("AllowAll");
 app.UseHttpsRedirection();
 
