@@ -46,5 +46,17 @@ namespace CGym.Infrastructure.Repositories
                 await _context.SaveChangesAsync();
             }
         }
+
+        public async Task <bool> ExistsAsync(int memeberId, int activityId)
+        {
+            return await _context.Bookings
+                .AnyAsync(b => b.MemberId == memeberId && b.ActivityId == activityId);
+        }
+
+        public async Task<int> CountByActivityIdAsync(int activityId)
+        {
+            return await _context.Bookings
+                .CountAsync(b => b.ActivityId == activityId);
+        }
     }
 }

@@ -26,11 +26,11 @@ namespace CGym.Application.Services
 
             var member = await _memberRepository.GetByIdAsync(memberId);
             if (member == null)
-                throw new InvalidOperationException("Member not found.");
+                throw new KeyNotFoundException("Member not found.");
 
             var activity = await _activityRepository.GetByIdAsync(activityId);
             if (activity == null)
-                throw new InvalidOperationException("Activity not found.");
+                throw new KeyNotFoundException("Activity not found.");
 
             var alreadyBooked = await _bookingRepository.ExistsAsync(memberId, activityId);
             if (alreadyBooked)
