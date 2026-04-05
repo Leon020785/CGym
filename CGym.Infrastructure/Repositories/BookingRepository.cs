@@ -19,6 +19,7 @@ namespace CGym.Infrastructure.Repositories
             return await _context.Bookings
                 .Include(b => b.Member)
                 .Include(b => b.Activity)
+                .ThenInclude(a => a.Trainer)
                 .ToListAsync();
         }
 
@@ -27,6 +28,7 @@ namespace CGym.Infrastructure.Repositories
             return await _context.Bookings
                 .Include(b => b.Member)
                 .Include(b => b.Activity)
+                .ThenInclude(a => a.Trainer)
                 .FirstOrDefaultAsync(b => b.Id == id);
         }
 

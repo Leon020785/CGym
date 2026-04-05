@@ -14,6 +14,8 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddSingleton<AuthService>();  // Token overlever på tværs af requests
 builder.Services.AddScoped<MemberService>();
+builder.Services.AddScoped<BookingService>();
+builder.Services.AddScoped<ActivityService>(); 
 
 var app = builder.Build();
 
