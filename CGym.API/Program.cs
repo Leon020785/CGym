@@ -24,7 +24,7 @@ builder.Services.AddDbContext<GymDbContext>(
 // Member system
 builder.Services.AddScoped<IMemberRepository, MemberRepository>();
 builder.Services.AddScoped<IMemberService, MemberService>();
-builder.Services.AddScoped<IActivityRepository, ActivityRepository>(); 
+builder.Services.AddScoped<IActivityService, ActivityService>(); 
 
 // User authentication system
 builder.Services.AddScoped<IUserRepository, UserRepository>();

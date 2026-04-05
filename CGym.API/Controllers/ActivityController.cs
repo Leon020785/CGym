@@ -8,18 +8,18 @@ namespace CGym.API.Controllers
     [Route("api/[controller]")]
     public class ActivityController : ControllerBase
     {
-        private readonly IActivityRepository _activityRepository;
+        private readonly IActivityService _activityService;
 
-        public ActivityController(IActivityRepository activityRepository)
+        public ActivityController(IActivityService activityService)
         {
-            _activityRepository = activityRepository;
+            _activityService = activityService;
         }
 
         // GET all activities
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var activities = await _activityRepository.GetAllAsync();
+            var activities = await _activityService.GetActivitiesAsync();
             return Ok(activities);
         }
 
@@ -27,7 +27,7 @@ namespace CGym.API.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var activity = await _activityRepository.GetByIdAsync(id);
+            var activity = await _activityService.GetByIdAsync(id);
 
             if (activity == null)
                 return NotFound();
@@ -39,15 +39,15 @@ namespace CGym.API.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(Activity activity)
         {
-            await _activityRepository.AddAsync(activity);
-            return Ok(activity);
+            var created = await _activityService.CreateAsync(activity);
+            return Ok(created);
         }
 
         // DELETE activity
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            await _activityRepository.DeleteAsync(id);
+            await _activityService.DeleteAsync(id);
             return NoContent();
         }
     }

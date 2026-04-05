@@ -1,10 +1,13 @@
-﻿using System;
+﻿using CGym.Domain.Entities;
 using System.Collections.Generic;
-using System.Text;
 
 namespace CGym.Application.Interfaces
 {
-    internal class IActivityService
+    public interface IActivityService
     {
+        Task<IEnumerable<Activity>> GetActivitiesAsync();
+        Task<Activity?> GetByIdAsync(int id);
+        Task<Activity> CreateAsync(Activity activity);
+        Task DeleteAsync(int id);  
     }
 }
