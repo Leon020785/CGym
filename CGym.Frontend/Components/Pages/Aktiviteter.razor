@@ -1,12 +1,17 @@
 ﻿@page "/aktiviteter"
 @rendermode InteractiveServer
-
+@inject CGym.Frontend.Services.ActivityService ActivityService
 <div class="aktiviteter-wrapper">
     <div class="page-header">
         <a href="/" class="back-btn">← </a>
         <h2 class="page-title">Aktiviteter</h2>
     </div>
     <p class="page-sub">Find og book dine yndlings træningshold</p>
+
+    @if (!string.IsNullOrWhiteSpace(loadError))
+    {
+        <p style="color:#dc2626; font-size:14px;">@loadError</p>
+    }
 
     <div class="activity-list">
         @foreach (var activity in activities)
@@ -159,15 +164,30 @@
 @code {
     private string message = "";
     private bool showToast = false;
+    private string? loadError;
+    private List<ActivityItem> activities = new();
 
-    private List<ActivityItem> activities = new()
+    protected override async Task OnInitializedAsync()
     {
-        new("HIIT Training", "Sarah Johnson", "9:00 - 10:00", 15, 12, "#ef4444"),
-        new("Yoga Flow", "Michael Chen", "10:30 - 11:30", 20, 8, "#a855f7"),
-        new("Styrketræning", "David Martinez", "12:00 - 13:00", 12, 10, "#3b82f6"),
-        new("Spinning", "Emma Wilson", "14:00 - 15:00", 18, 15, "#f59e0b"),
-        new("Boksning", "James Brown", "16:00 - 17:00", 10, 9, "#22c55e"),
-    };
+        try
+        {
+            var apiActivities = await ActivityService.GetActivitiesAsync();
+
+            activities = apiActivities
+                .Select(a => new ActivityItem(
+                    a.Name,
+                    "Ikke angivet",
+                    a.StartTime.ToString("HH:mm"),
+                    a.Capacity,
+                    0,
+                    "#16a34a"))
+                .ToList();
+        }
+        catch
+        {
+            loadError = "Kunne ikke hente aktiviteter fra serveren.";
+        }
+    }
 
     private async Task BookHold(string name)
     {

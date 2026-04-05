@@ -5,7 +5,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddHttpClient("API", client =>
 {
-    client.BaseAddress = new Uri("https://localhost:7181/");
+    client.BaseAddress = new Uri("http://localhost:5259/");
 });
 
 // Add services to the container.
@@ -14,6 +14,7 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddSingleton<AuthService>();  // Token overlever på tværs af requests
 builder.Services.AddScoped<MemberService>();
+builder.Services.AddScoped<ActivityService>(); // // Registrerer ActivityService i Dependency Injection containeren.
 
 var app = builder.Build();
 
