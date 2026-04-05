@@ -32,7 +32,7 @@ namespace CGym.API.Middleware
                     _ => (StatusCodes.Status500InternalServerError, "Internal Server Error", "Der skete en uventet fejl.")
                 };
 
-                var problem = new ProblemDetails
+                var problem = new ProblemDetails 
                 {
                     Status = status,
                     Title = title,
