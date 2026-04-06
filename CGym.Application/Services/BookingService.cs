@@ -28,8 +28,17 @@ namespace CGym.Application.Services
 
             var activity = await _activityRepository.GetByIdAsync(activityId);
 
+            var activity = await _activityRepository.GetByIdAsync(activityId);
             if (activity == null)
-                throw new Exception("Activity not found");
+                throw new KeyNotFoundException("Activity not found.");
+
+            var alreadyBooked = await _bookingRepository.ExistsAsync(memberId, activityId);
+            if (alreadyBooked)
+                throw new InvalidOperationException("Member has already booked this activity.");
+
+            var bookingCount = await _bookingRepository.CountByActivityIdAsync(activityId);
+            if (bookingCount >= activity.Capacity)
+                throw new InvalidOperationException("Activity is full.");
 
             var booking = new Booking
             {

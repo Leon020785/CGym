@@ -22,10 +22,9 @@ namespace CGym.API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateBooking(int memberId, int activityId)
+        public async Task<IActionResult> CreateBooking([FromQuery] int memberId, [FromQuery] int activityId)
         {
             var booking = await _bookingService.CreateBookingAsync(memberId, activityId);
-
             return Ok(booking);
         }
 

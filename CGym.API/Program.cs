@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Text.Json.Serialization;
+using CGym.API.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,7 +25,7 @@ builder.Services.AddDbContext<GymDbContext>(
 // Member system
 builder.Services.AddScoped<IMemberRepository, MemberRepository>();
 builder.Services.AddScoped<IMemberService, MemberService>();
-builder.Services.AddScoped<IActivityRepository, ActivityRepository>(); 
+builder.Services.AddScoped<IActivityService, ActivityService>(); 
 
 // User authentication system
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -93,6 +94,7 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 
+app.UseMiddleware<GlobalExceptionMiddleware>();
 app.UseCors("AllowAll");
 app.UseHttpsRedirection();
 

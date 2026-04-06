@@ -17,5 +17,11 @@ namespace CGym.Application.Interfaces
         Task AddAsync(Booking booking);
         Task DeleteAsync(int id);
 
+        // tjek om en booking allerede findes (duplicate)
+        Task<bool> ExistsAsync(int memberId, int activityId);
+
+        //tæller antal bookinger på en aktivitet (capacity check)
+        Task<int> CountByActivityIdAsync(int activityId);
+
     }
 }

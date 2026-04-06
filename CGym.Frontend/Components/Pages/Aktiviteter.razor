@@ -12,6 +12,11 @@
     </div>
     <p class="page-sub">Find og book dine yndlings træningshold</p>
 
+    @if (!string.IsNullOrWhiteSpace(loadError))
+    {
+        <p style="color:#dc2626; font-size:14px;">@loadError</p>
+    }
+
     <div class="activity-list">
         @foreach (var activity in activities)
         {
@@ -163,6 +168,8 @@
 @code {
     private string message = "";
     private bool showToast = false;
+    private string? loadError;
+    private List<ActivityItem> activities = new();
 
     private List<ActivityItem> activities = new();
 
