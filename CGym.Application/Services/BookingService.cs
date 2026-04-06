@@ -21,12 +21,12 @@ namespace CGym.Application.Services
 
         public async Task<Booking> CreateBookingAsync(int memberId, int activityId)
         {
-            if (memberId <= 0 || activityId <= 0)
-                throw new ArgumentException("MemberId og ActivityId skal være større end 0.");
-
             var member = await _memberRepository.GetByIdAsync(memberId);
+
             if (member == null)
-                throw new KeyNotFoundException("Member not found.");
+                throw new KeyNotFoundException("Member not found");
+
+            var activity = await _activityRepository.GetByIdAsync(activityId);
 
             var activity = await _activityRepository.GetByIdAsync(activityId);
             if (activity == null)
@@ -50,6 +50,21 @@ namespace CGym.Application.Services
             await _bookingRepository.AddAsync(booking);
 
             return booking;
+        }
+
+        public async Task<IEnumerable<Booking>> GetBookingsAsync()
+        {
+            return await _bookingRepository.GetAllAsync();
+        }
+
+        public async Task DeleteBookingAsync(int id)
+        {
+            var existing = await _bookingRepository.GetByIdAsync(id);
+                if (existing == null)
+
+                    throw new KeyNotFoundException("Booking Not found");
+                
+                await _bookingRepository.DeleteAsync(id);
         }
     }
 }

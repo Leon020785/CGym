@@ -16,12 +16,16 @@ namespace CGym.Infrastructure.Repositories
 
         public async Task<IEnumerable<Activity>> GetAllAsync()
         {
-            return await _context.Activities.ToListAsync();
+            return await _context.Activities
+                .Include(a => a.Trainer)
+                .ToListAsync();
         }
 
         public async Task<Activity?> GetByIdAsync(int id)
         {
-            return await _context.Activities.FindAsync(id);
+            return await _context.Activities
+                .Include(a => a.Trainer)
+                .FirstOrDefaultAsync(a => a.Id == id);
         }
 
         public async Task AddAsync(Activity activity)

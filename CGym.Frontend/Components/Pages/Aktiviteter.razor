@@ -1,6 +1,10 @@
 ﻿@page "/aktiviteter"
 @rendermode InteractiveServer
+@inject CGym.Frontend.Services.BookingService BookingService
 @inject CGym.Frontend.Services.ActivityService ActivityService
+@inject CGym.Frontend.Services.AuthService AuthService
+@inject CGym.Frontend.Services.MemberService MemberService
+
 <div class="aktiviteter-wrapper">
     <div class="page-header">
         <a href="/" class="back-btn">← </a>
@@ -30,7 +34,7 @@
                     <span>🕐 @activity.Time</span>
                     <span>👥 @activity.Enrolled/@activity.Capacity</span>
                 </div>
-                <button class="btn-book" @onclick="() => BookHold(activity.Name)">
+                <button class="btn-book" @onclick="() => BookHold(activity)">
                     Book hold
                 </button>
             </div>
@@ -167,31 +171,61 @@
     private string? loadError;
     private List<ActivityItem> activities = new();
 
+    private List<ActivityItem> activities = new();
+
     protected override async Task OnInitializedAsync()
+    {
+        var apiActivities = await ActivityService.GetActivitiesAsync(); 
+
+        activities = apiActivities
+            .Select(a => new ActivityItem(
+                a.Id, 
+                a.Name, 
+                a.Trainer?.Name ?? "Ikke angivet",
+                a.StartTime.ToString("HH:mm"), 
+                a.Capacity, 
+                0, 
+                "#16a34a"))
+            .ToList(); 
+    }
+
+    private async Task BookHold(ActivityItem activity)
     {
         try
         {
-            var apiActivities = await ActivityService.GetActivitiesAsync();
+            var email = AuthService.CurrentEmail;
 
-            activities = apiActivities
-                .Select(a => new ActivityItem(
-                    a.Name,
-                    "Ikke angivet",
-                    a.StartTime.ToString("HH:mm"),
-                    a.Capacity,
-                    0,
-                    "#16a34a"))
-                .ToList();
-        }
-        catch
-        {
-            loadError = "Kunne ikke hente aktiviteter fra serveren.";
-        }
-    }
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                message = "⚠️ Du skal være logget ind for at booke.";
+            }
+            else
+            {
+                var members = await MemberService.GetMembersAsync();
+                var memberId = members
+                    .FirstOrDefault(m => m.Email.Equals(email, StringComparison.OrdinalIgnoreCase))
+                    ?.Id;
 
-    private async Task BookHold(string name)
-    {
-        message = $"✅ Du har booket {name}!";
+                if (memberId is null)
+                {
+                    message = "⚠️ Der findes ingen member-profil for denne bruger.";
+                }
+                else
+                {
+                    await BookingService.CreateBookingAsync(memberId.Value, activity.Id);
+                    message = $"✅ Du har booket {activity.Name}!";
+                }
+            }
+        }
+            catch (HttpRequestException)
+            {
+                message = "⚠️ Kunne ikke gennemføre booking lige nu.";
+            }
+            catch
+                {
+                    message = "⚠️ Der skete en uventet fejl.";
+                }
+
         showToast = true;
         StateHasChanged();
         await Task.Delay(3000);
@@ -200,7 +234,7 @@
         StateHasChanged();
     }
 
-    private record ActivityItem(string Name, string Instructor, string Time, int Capacity, int Enrolled, string Color)
+    private record ActivityItem(int Id, string Name, string Instructor, string Time, int Capacity, int Enrolled, string Color)
     {
         public int SpotsLeft => Capacity - Enrolled;
     }

@@ -7,6 +7,7 @@ using Scalar.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Text.Json.Serialization;
 using CGym.API.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -41,7 +42,11 @@ builder.Services.AddScoped<IBookingService, BookingService>();
 
 
 // Add controllers
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+    });
 
 var key = builder.Configuration["Jwt:Key"];
 

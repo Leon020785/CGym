@@ -2,6 +2,7 @@
 using CGym.Application.Services;
 using CGym.API.DTOs;
 using Microsoft.AspNetCore.Authorization;
+using CGym.Application.Interfaces;
 
 namespace CGym.API.Controllers
 {
@@ -11,10 +12,12 @@ namespace CGym.API.Controllers
     public class AuthController : ControllerBase
     {
         private readonly AuthService _authService;
+        private readonly IMemberService _memberService;
 
-        public AuthController(AuthService authService)
+        public AuthController(AuthService authService, IMemberService memberService)
         {
             _authService = authService;
+            _memberService = memberService;
         }
 
         [HttpPost("register")]
@@ -24,6 +27,11 @@ namespace CGym.API.Controllers
                 request.Username,
                 request.Email,
                 request.Password
+            );
+            await _memberService.CreateMemberAsync(
+                request.Username,
+                "",
+                request.Email
             );
 
             return Ok("User registered successfully");

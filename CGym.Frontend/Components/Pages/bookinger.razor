@@ -1,6 +1,6 @@
 ﻿@page "/bookinger"
 @rendermode InteractiveServer
-
+@inject CGym.Frontend.Services.BookingService BookingService
 <div class="bookinger-wrapper">
     <div class="page-header">
         <a href="/" class="back-btn">←</a>
@@ -184,19 +184,40 @@
     private string message = "";
     private bool showToast = false;
 
-    private List<BookingItem> bookinger = new()
+    private List<BookingItem> bookinger = new();
+
+    protected override async Task OnInitializedAsync()
     {
-        new("HIIT Training", "Sarah Johnson", "16. marts 2026", "9:00 - 10:00", "#ef4444"),
-        new("Yoga Flow", "Michael Chen", "17. marts 2026", "10:30 - 11:30", "#a855f7"),
-        new("Styrketræning", "David Martinez", "18. marts 2026", "12:00 - 13:00", "#3b82f6"),
-        new("Spinning", "Emma Wilson", "19. marts 2026", "14:00 - 15:00", "#f59e0b"),
-        new("Boksning", "James Brown", "20. marts 2026", "16:00 - 17:00", "#22c55e"),
-    };
+        var apiBookings = await BookingService.GetBookingsAsync();
+
+        bookinger = apiBookings
+            .Select(b => new BookingItem(
+                b.Id,
+                b.Activity?.Name ?? "Ukendt aktivitet",
+                b.Activity?.Trainer?.Name ?? "Ikke angivet",
+                b.Activity?.StartTime.ToString("dd. MMMM yyyy") ?? "-",
+                b.Activity?.StartTime.ToString("HH:mm") ?? "-",
+                 "#3b82f6"))
+            .ToList();
+    }
 
     private async Task AflysBooking(BookingItem booking)
     {
-        bookinger.Remove(booking);
-        message = $"❌ {booking.Name} er aflyst";
+        try
+        {
+            await BookingService.CancelBookingAsync(booking.Id);
+            await OnInitializedAsync();
+            message = $"❌ {booking.Name} er aflyst";
+        }
+        catch (HttpRequestException)
+        {
+            message = "⚠️ Kunne ikke aflyse booking lige nu.";
+        }
+        catch
+        {
+            message = "⚠️ Der skete en uventet fejl.";
+        }
+
         showToast = true;
         StateHasChanged();
         await Task.Delay(3000);
@@ -205,5 +226,5 @@
         StateHasChanged();
     }
 
-    private record BookingItem(string Name, string Instructor, string Date, string Time, string Color);
+    private record BookingItem(int Id, string Name, string Instructor, string Date, string Time, string Color);
 }

@@ -21,7 +21,12 @@ namespace CGym.Frontend.Services
     {
         public int Id { get; set; }
         public string Name { get; set; } = "";
+        public ActivityTrainerApiModel? Trainer { get; set; }
         public DateTime StartTime { get; set; }
         public int Capacity { get; set; }
+    }
+    public class ActivityTrainerApiModel
+    {
+        public string Name { get; set; } = "";
     }
 }

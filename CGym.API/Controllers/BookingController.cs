@@ -14,11 +14,25 @@ namespace CGym.API.Controllers
             _bookingService = bookingService;
         }
 
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var bookings = await _bookingService.GetBookingsAsync();
+            return Ok(bookings); 
+        }
+
         [HttpPost]
         public async Task<IActionResult> CreateBooking([FromQuery] int memberId, [FromQuery] int activityId)
         {
             var booking = await _bookingService.CreateBookingAsync(memberId, activityId);
             return Ok(booking);
+        }
+
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            await _bookingService.DeleteBookingAsync(id);
+            return NoContent(); 
         }
     }
 }
