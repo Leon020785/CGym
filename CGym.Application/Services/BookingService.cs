@@ -28,7 +28,6 @@ namespace CGym.Application.Services
 
             var activity = await _activityRepository.GetByIdAsync(activityId);
 
-            var activity = await _activityRepository.GetByIdAsync(activityId);
             if (activity == null)
                 throw new KeyNotFoundException("Activity not found.");
 

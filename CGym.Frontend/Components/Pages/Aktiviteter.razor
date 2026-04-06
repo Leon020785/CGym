@@ -171,8 +171,6 @@
     private string? loadError;
     private List<ActivityItem> activities = new();
 
-    private List<ActivityItem> activities = new();
-
     protected override async Task OnInitializedAsync()
     {
         var apiActivities = await ActivityService.GetActivitiesAsync(); 
