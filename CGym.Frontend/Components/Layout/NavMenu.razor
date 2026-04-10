@@ -18,17 +18,17 @@
 
     <!-- Desktop links -->
     <div class="nav-links desktop">
-        <NavLink href="/" Match="NavLinkMatch.All" class="nav-item">🏠 Home</NavLink>
-        <NavLink href="/aktiviteter" class="nav-item">📋 Aktiviteter</NavLink>
-        <NavLink href="/bookinger" class="nav-item">📅 Bookinger</NavLink>
+        <NavLink href="/" Match="NavLinkMatch.All" class="nav-item"><i class="ti ti-home-2"></i> Home</NavLink>
+        <NavLink href="/aktiviteter" class="nav-item"><i class="ti ti-list"></i> Aktiviteter</NavLink>
+        <NavLink href="/bookinger" class="nav-item"><i class="ti ti-calendar-plus"></i> Bookinger</NavLink>
         @if (!string.IsNullOrEmpty(Auth.Token))
         {
-            <NavLink href="/admin" class="nav-item">⚙️ Admin</NavLink>
+            <NavLink href="/admin" class="nav-item"><i class="ti ti-user-cog"></i> Admin</NavLink>
             <button class="btn-logout" @onclick="Logout">Log ud</button>
         }
         else
         {
-            <NavLink href="/login" class="nav-item">🔑 Log ind</NavLink>
+            <NavLink href="/login" class="nav-item"><i class="ti ti-user-circle"></i> Log ind</NavLink>
         }
     </div>
 </nav>
@@ -37,17 +37,17 @@
 @if (menuOpen)
 {
     <div class="mobile-menu">
-        <NavLink href="/" Match="NavLinkMatch.All" class="mobile-item" @onclick="CloseMenu">🏠 Home</NavLink>
-        <NavLink href="/aktiviteter" class="mobile-item" @onclick="CloseMenu">📋 Aktiviteter</NavLink>
-        <NavLink href="/bookinger" class="mobile-item" @onclick="CloseMenu">📅 Bookinger</NavLink>
+        <NavLink href="/" Match="NavLinkMatch.All" class="mobile-item" @onclick="CloseMenu"><i class="ti ti-home-2"></i> Home</NavLink>
+        <NavLink href="/aktiviteter" class="mobile-item" @onclick="CloseMenu"><i class="ti ti-list"></i> Aktiviteter</NavLink>
+        <NavLink href="/bookinger" class="mobile-item" @onclick="CloseMenu"><i class="ti ti-calendar-plus"></i> Bookinger</NavLink>
         @if (!string.IsNullOrEmpty(Auth.Token))
         {
-            <NavLink href="/admin" class="mobile-item" @onclick="CloseMenu">⚙️ Admin</NavLink>
+            <NavLink href="/admin" class="mobile-item" @onclick="CloseMenu"><i class="ti ti-user-cog"></i> Admin</NavLink>
             <button class="mobile-logout" @onclick="Logout">Log ud</button>
         }
         else
         {
-            <NavLink href="/login" class="mobile-item" @onclick="CloseMenu">🔑 Log ind</NavLink>
+            <NavLink href="/login" class="mobile-item" @onclick="CloseMenu"><i class="ti ti-user-circle"></i> Log ind</NavLink>
         }
     </div>
 }
