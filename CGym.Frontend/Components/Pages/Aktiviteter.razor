@@ -173,18 +173,33 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var apiActivities = await ActivityService.GetActivitiesAsync(); 
+        try
+        {
+            loadError = null;
 
-        activities = apiActivities
-            .Select(a => new ActivityItem(
-                a.Id, 
-                a.Name, 
-                a.Trainer?.Name ?? "Ikke angivet",
-                a.StartTime.ToString("HH:mm"), 
-                a.Capacity, 
-                0, 
-                "#16a34a"))
-            .ToList(); 
+            var apiActivities = await ActivityService.GetActivitiesAsync();
+
+            activities = apiActivities
+                .Select(a => new ActivityItem(
+                    a.Id,
+                    a.Name,
+                    a.Trainer?.Name ?? "Ikke angivet",
+                    a.StartTime.ToString("HH:mm"),
+                    a.Capacity,
+                    0,
+                    "#16a34a"))
+                .ToList();
+        }
+        catch (HttpRequestException)
+        {
+            loadError = "Kunne ikke hente aktiviteter lige nu.";
+            activities = new();
+        }
+        catch
+        {
+            loadError = "Der skete en uventet fejl ved indlæsning af aktiviteter.";
+            activities = new();
+        }
     }
 
     private async Task BookHold(ActivityItem activity)
@@ -215,14 +230,18 @@
                 }
             }
         }
-            catch (HttpRequestException)
-            {
-                message = "⚠️ Kunne ikke gennemføre booking lige nu.";
-            }
-            catch
-                {
-                    message = "⚠️ Der skete en uventet fejl.";
-                }
+        catch (InvalidOperationException ex)
+        {
+            message = $"⚠️ {ex.Message}";
+        }
+        catch (HttpRequestException)
+        {
+            message = "⚠️ Kunne ikke gennemføre booking lige nu.";
+        }
+        catch
+        {
+            message = "⚠️ Der skete en uventet fejl.";
+        }
 
         showToast = true;
         StateHasChanged();
