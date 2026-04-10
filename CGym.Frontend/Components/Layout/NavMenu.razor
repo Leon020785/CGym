@@ -23,7 +23,7 @@
         <NavLink href="/bookinger" class="nav-item"><i class="ti ti-calendar-plus"></i> Bookinger</NavLink>
         @if (!string.IsNullOrEmpty(Auth.Token))
         {
-            <NavLink href="/admin" class="nav-item"><i class="ti ti-user-cog"></i> Admin</NavLink>
+            <NavLink href="/admin" class="nav-item"><i class="ti ti-shield-lock"></i> Admin</NavLink>
             <button class="btn-logout" @onclick="Logout">Log ud</button>
         }
         else
@@ -42,7 +42,7 @@
         <NavLink href="/bookinger" class="mobile-item" @onclick="CloseMenu"><i class="ti ti-calendar-plus"></i> Bookinger</NavLink>
         @if (!string.IsNullOrEmpty(Auth.Token))
         {
-            <NavLink href="/admin" class="mobile-item" @onclick="CloseMenu"><i class="ti ti-user-cog"></i> Admin</NavLink>
+            <NavLink href="/admin" class="mobile-item" @onclick="CloseMenu"><i class="ti ti-shield-lock"></i> Admin</NavLink>
             <button class="mobile-logout" @onclick="Logout">Log ud</button>
         }
         else
