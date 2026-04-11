@@ -84,6 +84,7 @@ namespace CGym.Frontend.Services
 
     public class ApiProblemDetails
     {
+        [System.Text.Json.Serialization.JsonPropertyName("detail")]
         public string? Detail { get; set; }
     }
 }

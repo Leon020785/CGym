@@ -18,11 +18,11 @@
 
     <!-- Desktop links -->
     <div class="nav-links desktop">
-        <NavLink href="/" Match="NavLinkMatch.All" class="nav-item"><i class="ti ti-home-2"></i> Home</NavLink>
-        <NavLink href="/aktiviteter" class="nav-item"><i class="ti ti-list"></i> Aktiviteter</NavLink>
-        <NavLink href="/bookinger" class="nav-item"><i class="ti ti-calendar-plus"></i> Bookinger</NavLink>
         @if (!string.IsNullOrEmpty(Auth.Token))
         {
+            <NavLink href="/" Match="NavLinkMatch.All" class="nav-item"><i class="ti ti-home-2"></i> Home</NavLink>
+            <NavLink href="/aktiviteter" class="nav-item"><i class="ti ti-list"></i> Aktiviteter</NavLink>
+            <NavLink href="/bookinger" class="nav-item"><i class="ti ti-calendar-plus"></i> Bookinger</NavLink>
             <NavLink href="/admin" class="nav-item"><i class="ti ti-shield-lock"></i> Admin</NavLink>
             <button class="btn-logout" @onclick="Logout">Log ud</button>
         }
@@ -37,11 +37,11 @@
 @if (menuOpen)
 {
     <div class="mobile-menu">
-        <NavLink href="/" Match="NavLinkMatch.All" class="mobile-item" @onclick="CloseMenu"><i class="ti ti-home-2"></i> Home</NavLink>
-        <NavLink href="/aktiviteter" class="mobile-item" @onclick="CloseMenu"><i class="ti ti-list"></i> Aktiviteter</NavLink>
-        <NavLink href="/bookinger" class="mobile-item" @onclick="CloseMenu"><i class="ti ti-calendar-plus"></i> Bookinger</NavLink>
         @if (!string.IsNullOrEmpty(Auth.Token))
         {
+            <NavLink href="/" Match="NavLinkMatch.All" class="mobile-item" @onclick="CloseMenu"><i class="ti ti-home-2"></i> Home</NavLink>
+            <NavLink href="/aktiviteter" class="mobile-item" @onclick="CloseMenu"><i class="ti ti-list"></i> Aktiviteter</NavLink>
+            <NavLink href="/bookinger" class="mobile-item" @onclick="CloseMenu"><i class="ti ti-calendar-plus"></i> Bookinger</NavLink>
             <NavLink href="/admin" class="mobile-item" @onclick="CloseMenu"><i class="ti ti-shield-lock"></i> Admin</NavLink>
             <button class="mobile-logout" @onclick="Logout">Log ud</button>
         }
