@@ -12,5 +12,6 @@ namespace CGym.Domain.Entities
         public string PasswordHash { get; set; } = null!;// vi bruger Hash for sikkerhed her.
 
         public DateTime CreatedAt { get; set;}
+        public bool IsAdmin { get; set; }
     }
 }

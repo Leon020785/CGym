@@ -9,9 +9,12 @@ namespace CGym.Frontend.Services
     {
         private readonly HttpClient _http;
 
+        public event Action? OnChange;
+
         public string? Token { get; private set; }
         public int? CurrentMemberId { get; private set; }
         public string? CurrentEmail { get; private set; }
+        public bool IsAdmin { get; private set; }
 
         public AuthService(IHttpClientFactory factory)
         {
@@ -34,8 +37,9 @@ namespace CGym.Frontend.Services
             Token = result?.Token;
             CurrentMemberId = GetUserIdFromToken(Token);
             CurrentEmail = GetEmailFromToken(Token);
+            IsAdmin = GetIsAdminFromToken(Token);
 
-
+            OnChange?.Invoke();
             return true;
         }
 
@@ -54,6 +58,8 @@ namespace CGym.Frontend.Services
             Token = null;
             CurrentMemberId = null;
             CurrentEmail = null;
+            IsAdmin = false;
+            OnChange?.Invoke();
         }
 
         private static int? GetUserIdFromToken(string? token)
@@ -80,6 +86,20 @@ namespace CGym.Frontend.Services
 
             return jwt.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value
                 ?? jwt.Claims.FirstOrDefault(c => c.Type == "email")?.Value;
+        }
+
+        private static bool GetIsAdminFromToken(string? token)
+        {
+            if (string.IsNullOrWhiteSpace(token))
+                return false;
+
+            var handler = new JwtSecurityTokenHandler();
+            var jwt = handler.ReadJwtToken(token);
+
+            var role = jwt.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value
+                ?? jwt.Claims.FirstOrDefault(c => c.Type == "role")?.Value;
+
+            return role == "Admin";
         }
     }
 }

@@ -1,0 +1,179 @@
+@page "/admin/login"
+@rendermode InteractiveServer
+@inject CGym.Frontend.Services.AuthService AuthService
+@inject NavigationManager Nav
+
+<div class="login-wrapper">
+    <div class="login-card">
+        <div class="logo-icon">
+            <i class="ti ti-shield-lock" style="font-size:40px; color:white;"></i>
+        </div>
+
+        <h1 class="brand">Admin Login</h1>
+        <p class="subtitle">Kun for administratorer</p>
+
+        <div class="form-group">
+            <label>Email</label>
+            <input @bind="email" type="email" placeholder="admin@eksempel.dk" class="input-field" />
+        </div>
+
+        <div class="form-group">
+            <label>Adgangskode</label>
+            <input @bind="password" type="password" placeholder="••••••••" class="input-field" />
+        </div>
+
+        @if (!string.IsNullOrEmpty(message))
+        {
+            <p class="error-msg">@message</p>
+        }
+
+        <button @onclick="HandleLogin" class="btn-login" disabled="@isLoading">
+            @if (isLoading)
+            {
+                <span>Logger ind...</span>
+            }
+            else
+            {
+                <span>Log ind som admin</span>
+            }
+        </button>
+    </div>
+</div>
+
+<style>
+    .login-wrapper {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #1e3a5f 0%, #1e40af 50%, #1d4ed8 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    .login-card {
+        background: white;
+        border-radius: 20px;
+        padding: 48px 40px;
+        width: 100%;
+        max-width: 400px;
+        box-shadow: 0 8px 40px rgba(0,0,0,0.20);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .logo-icon {
+        background: #1d4ed8;
+        border-radius: 16px;
+        width: 90px;
+        height: 90px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 4px;
+    }
+
+    .brand {
+        font-size: 28px;
+        font-weight: 700;
+        color: #111827;
+        margin: 0;
+    }
+
+    .subtitle {
+        color: #6b7280;
+        font-size: 15px;
+        margin: 0 0 16px 0;
+    }
+
+    .form-group {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin-bottom: 8px;
+    }
+
+        .form-group label {
+            font-size: 14px;
+            font-weight: 500;
+            color: #374151;
+        }
+
+    .input-field {
+        width: 100%;
+        padding: 12px 16px;
+        border: 1.5px solid #e5e7eb;
+        border-radius: 10px;
+        font-size: 15px;
+        outline: none;
+        transition: border-color 0.2s;
+        box-sizing: border-box;
+    }
+
+        .input-field:focus {
+            border-color: #1d4ed8;
+        }
+
+    .btn-login {
+        width: 100%;
+        padding: 14px;
+        background: #1d4ed8;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 8px;
+        transition: background 0.2s;
+    }
+
+        .btn-login:hover {
+            background: #1e40af;
+        }
+
+        .btn-login:disabled {
+            background: #93c5fd;
+            cursor: not-allowed;
+        }
+
+    .error-msg {
+        color: #dc2626;
+        font-size: 14px;
+        margin: 0;
+    }
+</style>
+
+@code {
+    private string email = "";
+    private string password = "";
+    private string message = "";
+    private bool isLoading = false;
+
+    private async Task HandleLogin()
+    {
+        isLoading = true;
+        message = "";
+
+        var success = await AuthService.Login(email, password);
+
+        if (!success)
+        {
+            message = "Forkert email eller adgangskode.";
+            isLoading = false;
+            return;
+        }
+
+        if (!AuthService.IsAdmin)
+        {
+            AuthService.Logout();
+            message = "Du har ikke adgang. Kun admins kan logge ind her.";
+            isLoading = false;
+            return;
+        }
+
+        Nav.NavigateTo("/admin");
+    }
+}

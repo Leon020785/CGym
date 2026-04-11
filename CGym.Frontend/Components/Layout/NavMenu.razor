@@ -1,18 +1,20 @@
-﻿@inject CGym.Frontend.Services.AuthService Auth
+﻿@rendermode InteractiveServer
+@implements IDisposable
+@inject CGym.Frontend.Services.AuthService Auth
 @inject NavigationManager Nav
 
 <nav class="top-nav">
-    <a href="/" class="nav-brand">💪 CGym</a>
+    <a href="/" class="nav-brand"><i class="ti ti-barbell"></i> CGym</a>
 
     <!-- Hamburger knap (mobil) -->
     <button class="hamburger" @onclick="ToggleMenu">
         @if (menuOpen)
         {
-            <span>✕</span>
+            <i class="ti ti-x"></i>
         }
         else
         {
-            <span>☰</span>
+            <i class="ti ti-menu-2"></i>
         }
     </button>
 
@@ -22,13 +24,15 @@
         {
             <NavLink href="/" Match="NavLinkMatch.All" class="nav-item"><i class="ti ti-home-2"></i> Home</NavLink>
             <NavLink href="/aktiviteter" class="nav-item"><i class="ti ti-list"></i> Aktiviteter</NavLink>
-            <NavLink href="/bookinger" class="nav-item"><i class="ti ti-calendar-plus"></i> Bookinger</NavLink>
-            <NavLink href="/admin" class="nav-item"><i class="ti ti-shield-lock"></i> Admin</NavLink>
+            @if (!Auth.IsAdmin)
+            {
+                <NavLink href="/bookinger" class="nav-item"><i class="ti ti-calendar-plus"></i> Bookinger</NavLink>
+            }
             <button class="btn-logout" @onclick="Logout">Log ud</button>
         }
         else
         {
-            <NavLink href="/login" class="nav-item"><i class="ti ti-user-circle"></i> Log ind</NavLink>
+            <NavLink href="/admin/login" class="nav-item"><span class="material-symbols-outlined">shield_person</span> Login Admin</NavLink>
         }
     </div>
 </nav>
@@ -41,13 +45,15 @@
         {
             <NavLink href="/" Match="NavLinkMatch.All" class="mobile-item" @onclick="CloseMenu"><i class="ti ti-home-2"></i> Home</NavLink>
             <NavLink href="/aktiviteter" class="mobile-item" @onclick="CloseMenu"><i class="ti ti-list"></i> Aktiviteter</NavLink>
-            <NavLink href="/bookinger" class="mobile-item" @onclick="CloseMenu"><i class="ti ti-calendar-plus"></i> Bookinger</NavLink>
-            <NavLink href="/admin" class="mobile-item" @onclick="CloseMenu"><i class="ti ti-shield-lock"></i> Admin</NavLink>
+            @if (!Auth.IsAdmin)
+            {
+                <NavLink href="/bookinger" class="mobile-item" @onclick="CloseMenu"><i class="ti ti-calendar-plus"></i> Bookinger</NavLink>
+            }
             <button class="mobile-logout" @onclick="Logout">Log ud</button>
         }
         else
         {
-            <NavLink href="/login" class="mobile-item" @onclick="CloseMenu"><i class="ti ti-user-circle"></i> Log ind</NavLink>
+            <NavLink href="/admin/login" class="mobile-item" @onclick="CloseMenu"><span class="material-symbols-outlined">shield_person</span> Login Admin</NavLink>
         }
     </div>
 }
@@ -87,6 +93,9 @@
         color: #374151;
         text-decoration: none;
         transition: background 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
     }
 
         .nav-item:hover, .nav-item.active {
@@ -143,6 +152,9 @@
         text-decoration: none;
         border-radius: 10px;
         transition: background 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 6px;
     }
 
         .mobile-item:hover, .mobile-item.active {
@@ -182,6 +194,16 @@
 @code {
     private bool menuOpen = false;
 
+    protected override void OnInitialized()
+    {
+        Auth.OnChange += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        Auth.OnChange -= StateHasChanged;
+    }
+
     private void ToggleMenu() => menuOpen = !menuOpen;
     private void CloseMenu() => menuOpen = false;
 
@@ -189,6 +211,6 @@
     {
         Auth.Logout();
         menuOpen = false;
-        Nav.NavigateTo("/login");
+        Nav.NavigateTo("/");
     }
 }
