@@ -16,19 +16,19 @@
         <div class="hero-banner">
             <div class="hero-text">
                 <p class="quote">"Din krop kan alt - det er dit hoved du skal overbevise"</p>
-                <span class="hero-link">Bliv stærkere hver dag 💪</span>
+                <span class="hero-link"><i class="ti ti-barbell"></i> Bliv stærkere hver dag</span>
             </div>
         </div>
 
         <!-- Stats -->
         <div class="stats-grid">
             <div class="stat-card green">
-                <span class="stat-icon">📅</span>
+                <span class="stat-icon"><i class="ti ti-calendar"></i></span>
                 <div class="stat-number">5</div>
                 <div class="stat-label">Aktive bookinger</div>
             </div>
             <div class="stat-card white">
-                <span class="stat-icon">📋</span>
+                <span class="stat-icon"><i class="ti ti-clipboard-list"></i></span>
                 <div class="stat-number">12</div>
                 <div class="stat-label">Hold tilgængelige</div>
             </div>
@@ -36,24 +36,24 @@
 
         <!-- Ugens mester banner -->
         <div class="champion-banner">
-            <span class="champion-icon">🏆</span>
+            <span class="champion-icon"><i class="ti ti-trophy"></i></span>
             <div>
-                <div class="champion-title">Ugens mester! 🎉</div>
+                <div class="champion-title">Ugens mester! <i class="ti ti-confetti"></i></div>
                 <div class="champion-sub">Du har deltaget i 8 hold denne uge</div>
             </div>
         </div>
 
         <!-- Knapper -->
         <a href="/aktiviteter" class="btn-full-green">
-            📅 Se alle aktiviteter
+            <i class="ti ti-calendar"></i> Se alle aktiviteter
         </a>
         <a href="/bookinger" class="btn-full-outline">
-            📋 Mine bookinger
+            <i class="ti ti-clipboard-list"></i> Mine bookinger
         </a>
 
         <!-- Fremskridt -->
         <div class="progress-card">
-            <div class="progress-title">📈 Dine fremskridt</div>
+            <div class="progress-title"><i class="ti ti-trending-up"></i> Dine fremskridt</div>
             <div class="progress-row">
                 <span>Hold i denne måned</span>
                 <span class="progress-value">24</span>
@@ -67,34 +67,6 @@
                 <span class="progress-value green-text">HIIT Training</span>
             </div>
         </div>
-    </div>
-}
-else
-{
-    <div class="not-logged-in">
-        <div class="logo-icon">
-            <svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="28" cy="28" r="26" stroke="white" stroke-width="2" fill="none" />
-                <circle cx="28" cy="28" r="20" stroke="white" stroke-width="1" fill="none" />
-                <circle cx="28" cy="16" r="3" fill="white" />
-                <path d="M22 20 Q28 19 34 20 L32 30 H24 Z" fill="white" />
-                <path d="M22 20 L16 24 Q14 26 16 28 L20 26 L22 24" fill="white" />
-                <path d="M34 20 L40 24 Q42 26 40 28 L36 26 L34 24" fill="white" />
-                <path d="M24 30 L22 40 L26 40 L28 34 L30 40 L34 40 L32 30" fill="white" />
-                <path id="topArc2" d="M 10,28 A 18,18 0 0,1 46,28" fill="none" />
-                <text font-size="5" fill="white" font-family="serif" font-weight="bold" letter-spacing="1">
-                    <textPath href="#topArc2" startOffset="10%">— CGYM FITNESS —</textPath>
-                </text>
-                <path id="bottomArc2" d="M 10,28 A 18,18 0 0,0 46,28" fill="none" />
-                <text font-size="4.5" fill="white" font-family="serif" letter-spacing="1">
-                    <textPath href="#bottomArc2" startOffset="15%">SINCE 2025</textPath>
-                </text>
-            </svg>
-        </div>
-        <h1 class="brand">CGym</h1>
-        <p class="subtitle">Log ind for at se dit dashboard</p>
-        <a href="/login" class="btn-login-link">Log ind</a>
-        <a href="/register" class="btn-register-link">Opret konto</a>
     </div>
 }
 
@@ -342,3 +314,11 @@ else
         border: 2px solid #16a34a;
     }
 </style>
+
+@code {
+    protected override void OnInitialized()
+    {
+        if (string.IsNullOrEmpty(Auth.Token))
+            Nav.NavigateTo("/login");
+    }
+}

@@ -24,15 +24,15 @@
                 <div class="activity-top">
                     <div>
                         <div class="activity-name">@activity.Name</div>
-                        <div class="activity-instructor">👤 @activity.Instructor</div>
+                        <div class="activity-instructor"><i class="ti ti-user"></i> @activity.Instructor</div>
                     </div>
                     <div class="activity-spots" style="color: @activity.Color">
                         @activity.SpotsLeft pladser
                     </div>
                 </div>
                 <div class="activity-info">
-                    <span>🕐 @activity.Time</span>
-                    <span>👥 @activity.Enrolled/@activity.Capacity</span>
+                    <span><i class="ti ti-clock"></i> @activity.Time</span>
+                    <span><i class="ti ti-users"></i> @activity.Enrolled/@activity.Capacity</span>
                 </div>
                 <button class="btn-book" @onclick="() => BookHold(activity)">
                     Book hold
@@ -43,7 +43,9 @@
 
     @if (!string.IsNullOrEmpty(message))
     {
-        <div class="toast @(showToast ? "show" : "")">@message</div>
+        <div class="toast @(showToast ? "show" : "")">
+            <i class="ti @toastIcon"></i> @message
+        </div>
     }
 </div>
 
@@ -167,6 +169,7 @@
 
 @code {
     private string message = "";
+    private string toastIcon = "ti-alert-triangle";
     private bool showToast = false;
     private string? loadError;
     private List<ActivityItem> activities = new();
@@ -210,7 +213,8 @@
 
             if (string.IsNullOrWhiteSpace(email))
             {
-                message = "⚠️ Du skal være logget ind for at booke.";
+                toastIcon = "ti-alert-triangle";
+                message = "Du skal være logget ind for at booke.";
             }
             else
             {
@@ -221,26 +225,31 @@
 
                 if (memberId is null)
                 {
-                    message = "⚠️ Der findes ingen member-profil for denne bruger.";
+                    toastIcon = "ti-alert-triangle";
+                    message = "Der findes ingen member-profil for denne bruger.";
                 }
                 else
                 {
                     await BookingService.CreateBookingAsync(memberId.Value, activity.Id);
-                    message = $"✅ Du har booket {activity.Name}!";
+                    toastIcon = "ti-circle-check";
+                    message = $"Du har booket {activity.Name}!";
                 }
             }
         }
         catch (InvalidOperationException ex)
         {
-            message = $"⚠️ {ex.Message}";
+            toastIcon = "ti-alert-triangle";
+            message = ex.Message;
         }
         catch (HttpRequestException)
         {
-            message = "⚠️ Kunne ikke gennemføre booking lige nu.";
+            toastIcon = "ti-alert-triangle";
+            message = "Kunne ikke gennemføre booking lige nu.";
         }
         catch
         {
-            message = "⚠️ Der skete en uventet fejl.";
+            toastIcon = "ti-alert-triangle";
+            message = "Der skete en uventet fejl.";
         }
 
         showToast = true;

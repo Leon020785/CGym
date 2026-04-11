@@ -52,12 +52,12 @@
     <!-- Stats -->
     <div class="stats-grid">
         <div class="stat-card blue">
-            <span class="stat-icon">📈</span>
+            <span class="stat-icon"><i class="ti ti-trending-up"></i></span>
             <div class="stat-number">@totalAktiviteter</div>
             <div class="stat-label">Totale aktiviteter</div>
         </div>
         <div class="stat-card pink">
-            <span class="stat-icon">👥</span>
+            <span class="stat-icon"><i class="ti ti-users"></i></span>
             <div class="stat-number">@totalBookinger</div>
             <div class="stat-label">Totale bookinger</div>
         </div>
@@ -73,9 +73,9 @@
                 <div class="activity-item">
                     <div>
                         <div class="activity-name">@a.Navn</div>
-                        <div class="activity-detail">👤 @a.Instruktør · 🕐 @a.Tidspunkt · 👥 0/@a.Kapacitet</div>
+                        <div class="activity-detail"><i class="ti ti-user"></i> @a.Instruktør · <i class="ti ti-clock"></i> @a.Tidspunkt · <i class="ti ti-users"></i> 0/@a.Kapacitet</div>
                     </div>
-                    <button class="btn-delete" @onclick="() => SletAktivitet(a)">✕</button>
+                    <button class="btn-delete" @onclick="() => SletAktivitet(a)"><i class="ti ti-x"></i></button>
                 </div>
             }
         </div>
@@ -338,7 +338,7 @@
         aktiviteter.Add(new AktivitetItem(navn, instruktør, tidspunkt, kapacitet));
         totalAktiviteter++;
         success = true;
-        message = $"✅ {navn} er oprettet!";
+        message = $"{navn} er oprettet!";
         navn = "";
         instruktør = "";
         tidspunkt = "";
@@ -349,7 +349,7 @@
     {
         aktiviteter.Remove(a);
         totalAktiviteter--;
-        message = $"❌ {a.Navn} er slettet";
+        message = $"{a.Navn} er slettet";
         success = false;
     }
 

@@ -14,11 +14,11 @@
             <div class="booking-card" style="border-top: 4px solid @booking.Color">
                 <div class="booking-top">
                     <div class="booking-name">@booking.Name</div>
-                    <button class="btn-close" @onclick="() => AflysBooking(booking)">✕</button>
+                    <button class="btn-close" @onclick="() => AflysBooking(booking)"><i class="ti ti-x"></i></button>
                 </div>
-                <div class="booking-detail">👤 @booking.Instructor</div>
-                <div class="booking-detail">📅 @booking.Date</div>
-                <div class="booking-detail">🕐 @booking.Time</div>
+                <div class="booking-detail"><i class="ti ti-user"></i> @booking.Instructor</div>
+                <div class="booking-detail"><i class="ti ti-calendar"></i> @booking.Date</div>
+                <div class="booking-detail"><i class="ti ti-clock"></i> @booking.Time</div>
                 <button class="btn-aflys" @onclick="() => AflysBooking(booking)">
                     Aflys booking
                 </button>
@@ -28,7 +28,7 @@
         @if (bookinger.Count == 0)
         {
             <div class="empty-state">
-                <p>📭 Du har ingen bookinger endnu</p>
+                <p><i class="ti ti-inbox"></i> Du har ingen bookinger endnu</p>
                 <a href="/aktiviteter" class="btn-find">Find aktiviteter</a>
             </div>
         }
@@ -36,7 +36,9 @@
 
     @if (!string.IsNullOrEmpty(message))
     {
-        <div class="toast @(showToast ? "show" : "")">@message</div>
+        <div class="toast @(showToast ? "show" : "")">
+            <i class="ti @toastIcon"></i> @message
+        </div>
     }
 </div>
 
@@ -182,6 +184,7 @@
 
 @code {
     private string message = "";
+    private string toastIcon = "ti-alert-triangle";
     private bool showToast = false;
 
     private List<BookingItem> bookinger = new();
@@ -207,15 +210,18 @@
         {
             await BookingService.CancelBookingAsync(booking.Id);
             await OnInitializedAsync();
-            message = $"❌ {booking.Name} er aflyst";
+            toastIcon = "ti-circle-x";
+            message = $"{booking.Name} er aflyst";
         }
         catch (HttpRequestException)
         {
-            message = "⚠️ Kunne ikke aflyse booking lige nu.";
+            toastIcon = "ti-alert-triangle";
+            message = "Kunne ikke aflyse booking lige nu.";
         }
         catch
         {
-            message = "⚠️ Der skete en uventet fejl.";
+            toastIcon = "ti-alert-triangle";
+            message = "Der skete en uventet fejl.";
         }
 
         showToast = true;
