@@ -1,5 +1,4 @@
-﻿using System.Net.Http.Json;
-using CGym.Frontend.Models;
+﻿using CGym.Frontend.Models;
 
 namespace CGym.Frontend.Services
 {
