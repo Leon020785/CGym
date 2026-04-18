@@ -1,4 +1,5 @@
-﻿using System.Net.Http.Json;
+﻿
+using System.Net.Http.Json;
 
 namespace CGym.Frontend.Services
 {
@@ -15,6 +16,13 @@ namespace CGym.Frontend.Services
         {
             return await _http.GetFromJsonAsync<List<ActivityApiModel>>("api/activity") ?? new();
         }
+
+        public async Task<ActivityApiModel?> CreateActivityAsync(CreateActivityRequest request)
+        {
+            var response = await _http.PostAsJsonAsync("api/activity", request);
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<ActivityApiModel>(); 
+        }
     }
 
     public class ActivityApiModel
@@ -28,5 +36,13 @@ namespace CGym.Frontend.Services
     public class ActivityTrainerApiModel
     {
         public string Name { get; set; } = "";
+    }
+
+    public class CreateActivityRequest
+    {
+        public string Name { get; set; } = "";
+        public DateTime StartTime { get; set; }
+        public int Capacity { get; set; }
+        public int TrainerId { get; set; }
     }
 }

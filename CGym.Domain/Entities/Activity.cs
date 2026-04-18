@@ -15,10 +15,10 @@ namespace CGym.Domain.Entities
 
         public int TrainerId { get; set; }
 
-        public Trainer Trainer { get; set; }
+        public Trainer? Trainer { get; set; }
         // navigation property til trainer
 
-        public ICollection<Booking> Bookings { get; set; }
+        public ICollection<Booking> Bookings { get; set; } = new List<Booking>(); 
         // List over alle bookings til denne aktivitet
     }
 }

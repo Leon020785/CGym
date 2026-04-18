@@ -32,6 +32,7 @@
                 </div>
                 <div class="activity-info">
                     <span><i class="ti ti-clock"></i> @activity.Time</span>
+                    <span><i class="ti ti-calendar"></i> @activity.Date</span>
                     <span><i class="ti ti-users"></i> @activity.Enrolled/@activity.Capacity</span>
                 </div>
                 <button class="btn-book" @onclick="() => BookHold(activity)">
@@ -187,6 +188,7 @@
                     a.Id,
                     a.Name,
                     a.Trainer?.Name ?? "Ikke angivet",
+                    a.StartTime.ToString("dd-MM-yyyy"),
                     a.StartTime.ToString("HH:mm"),
                     a.Capacity,
                     0,
@@ -260,7 +262,7 @@
         StateHasChanged();
     }
 
-    private record ActivityItem(int Id, string Name, string Instructor, string Time, int Capacity, int Enrolled, string Color)
+    private record ActivityItem(int Id, string Name, string Instructor, string Time,String Date, int Capacity, int Enrolled, string Color)
     {
         public int SpotsLeft => Capacity - Enrolled;
     }
