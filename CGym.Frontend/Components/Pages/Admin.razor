@@ -1,5 +1,9 @@
-﻿@page "/admin"
+﻿@using CGym.Frontend.Services
+@page "/admin"
 @rendermode InteractiveServer
+@inject ActivityService ActivityService
+@inject TrainerService TrainerService
+
 
 <div class="admin-wrapper">
     <div class="page-header">
@@ -24,19 +28,23 @@
             <input @bind="navn" placeholder="f.eks. HIIT Training" class="input-field" />
         </div>
 
-        <div class="form-group">
-            <label>Instruktør</label>
-            <input @bind="instruktør" placeholder="f.eks. Sarah Johnson" class="input-field" />
-        </div>
+        <select @bind="selectedTrainerId" class="input-field">
+            <option value =""> Vælg en træner</option>
+            @foreach (var t in trainers)
+            {
+                <option value="@t.Id">@t.Name</option>
+            }
+
+        </select>
 
         <div class="form-group">
             <label>Tidspunkt</label>
-            <input @bind="tidspunkt" placeholder="f.eks. 9:00 - 10:00" class="input-field" />
+            <input @bind="startDatoTid" type="datetime-local" class="input-field"/>
         </div>
 
         <div class="form-group">
             <label>Kapacitet</label>
-            <input @bind="kapacitet" placeholder="f.eks. 15" class="input-field" type="number" />
+            <input @bind="kapacitet" type="number" min="1" step="1" placeholder="f.eks. 15" class="input-field" />
         </div>
 
         @if (!string.IsNullOrEmpty(message))
@@ -45,7 +53,7 @@
         }
 
         <button class="btn-opret" @onclick="OpretAktivitet">
-            + Opret aktivitet
+            Opret aktivitet
         </button>
     </div>
 
@@ -315,34 +323,68 @@
 
 @code {
     private string navn = "";
-    private string instruktør = "";
-    private string tidspunkt = "";
     private int kapacitet = 0;
     private string message = "";
     private bool success = false;
     private int totalAktiviteter = 12;
     private int totalBookinger = 48;
+    private int? selectedTrainerId;
+    private DateTime? startDatoTid;
 
+
+    private List<TrainerApiModel> trainers = new();
     private List<AktivitetItem> aktiviteter = new();
 
-    private void OpretAktivitet()
+    protected override async Task OnInitializedAsync()
     {
-        if (string.IsNullOrWhiteSpace(navn) || string.IsNullOrWhiteSpace(instruktør) ||
-            string.IsNullOrWhiteSpace(tidspunkt) || kapacitet <= 0)
+        try
+        {
+            trainers = await TrainerService.GetTrainersAsync();
+        }
+        catch
+        {
+            success = false;
+            message = "Kunne ikke hente træner.";
+        }
+
+    }
+
+    private async Task OpretAktivitet()
+    {
+        if (string.IsNullOrWhiteSpace(navn) ||
+            !startDatoTid.HasValue || 
+            kapacitet <= 0 || 
+            !selectedTrainerId.HasValue)
         {
             success = false;
             message = "Udfyld alle felter korrekt.";
             return;
         }
 
-        aktiviteter.Add(new AktivitetItem(navn, instruktør, tidspunkt, kapacitet));
-        totalAktiviteter++;
-        success = true;
-        message = $"{navn} er oprettet!";
-        navn = "";
-        instruktør = "";
-        tidspunkt = "";
-        kapacitet = 0;
+        var request = new CreateActivityRequest
+        {
+            Name = navn.Trim(),
+            StartTime = startDatoTid.Value,
+            Capacity = kapacitet,
+            TrainerId = selectedTrainerId.Value
+        }; 
+
+        try
+        {
+            await ActivityService.CreateActivityAsync(request);
+            totalAktiviteter++;
+            success = true; 
+            message = $"{navn} er oprettet!";
+            navn = "";
+            kapacitet = 0;
+            selectedTrainerId = null;
+            startDatoTid = null; 
+        } catch
+        {
+            success = false; 
+            message = "Kunne ikke oprette aktivitet via API.";
+        }
+
     }
 
     private void SletAktivitet(AktivitetItem a)
