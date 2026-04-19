@@ -22,21 +22,25 @@ builder.Services.AddDbContext<GymDbContext>(
 
 // ---------------- DI (Dependency Injection) ----------------
 
-// Member system
+//  Domain services
 builder.Services.AddScoped<IMemberRepository, MemberRepository>();
 builder.Services.AddScoped<IMemberService, MemberService>();
+
+// Activities 
+builder.Services.AddScoped<IActivityRepository, ActivityRepository>();
 builder.Services.AddScoped<IActivityService, ActivityService>(); 
 
 // User authentication system
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<AuthService>();
 
-// ⭐ BOOKING SYSTEM (DET DU MANGLEDE)
+// Bookings
 builder.Services.AddScoped<IBookingRepository, BookingRepository>();
-builder.Services.AddScoped<IActivityRepository, ActivityRepository>();
-builder.Services.AddScoped<ITrainerRepository, TrainerRepository>();
-
 builder.Services.AddScoped<IBookingService, BookingService>();
+
+// Trainers 
+builder.Services.AddScoped<ITrainerRepository, TrainerRepository>();
+builder.Services.AddScoped<ITrainerService, TrainerService>();
 
 // ------------------------------------------------------------
 
