@@ -6,16 +6,19 @@ namespace CGym.API.Controllers
     [Route("api/[controller]")]
     public class TrainerController : ControllerBase
     {
-        private readonly ITrainerRepository _trainerRepository;
+        private readonly ITrainerService _trainerService;
 
-        public TrainerController(ITrainerRepository trainerRepository)
-            => _trainerRepository = trainerRepository;
+        public TrainerController(ITrainerService trainerService)
+        {
+            _trainerService = trainerService;
+        }
+            
 
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var trainers = await _trainerRepository.GetTrainersAsync();
+            var trainers = await _trainerService.GetTrainersAsync();
             return Ok(trainers);
         }
     }
