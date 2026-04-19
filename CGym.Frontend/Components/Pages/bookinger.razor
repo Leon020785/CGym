@@ -6,10 +6,10 @@
         <a href="/" class="back-btn">←</a>
         <h2 class="page-title">Mine bookinger</h2>
     </div>
-    <p class="page-sub">Du har @bookinger.Count kommende bookinger</p>
+    <p class="page-sub">Du har @bookingList.Count kommende bookinger</p>
 
     <div class="booking-list">
-        @foreach (var booking in bookinger)
+        @foreach (var booking in bookingList)
         {
             <div class="booking-card" style="border-top: 4px solid @booking.Color">
                 <div class="booking-top">
@@ -25,7 +25,7 @@
             </div>
         }
 
-        @if (bookinger.Count == 0)
+        @if (bookingList.Count == 0)
         {
             <div class="empty-state">
                 <p><i class="ti ti-inbox"></i> Du har ingen bookinger endnu</p>
@@ -187,13 +187,13 @@
     private string toastIcon = "ti-alert-triangle";
     private bool showToast = false;
 
-    private List<BookingItem> bookinger = new();
+    private List<BookingItem> bookingList = new();
 
     protected override async Task OnInitializedAsync()
     {
         var apiBookings = await BookingService.GetBookingsAsync();
 
-        bookinger = apiBookings
+        bookingList = apiBookings
             .Select(b => new BookingItem(
                 b.Id,
                 b.Activity?.Name ?? "Ukendt aktivitet",
