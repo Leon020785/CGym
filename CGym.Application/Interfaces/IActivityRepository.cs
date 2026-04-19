@@ -11,6 +11,8 @@ namespace CGym.Application.Interfaces
         Task<Activity?> GetByIdAsync(int id); // aktivitet basert på id.
         Task AddAsync(Activity activity); 
         Task DeleteAsync(int id);
+        Task<Activity?> UpdateAsync(int id, Activity activity);
+
 
 
 

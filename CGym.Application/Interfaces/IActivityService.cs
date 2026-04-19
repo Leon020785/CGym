@@ -8,6 +8,9 @@ namespace CGym.Application.Interfaces
         Task<IEnumerable<Activity>> GetActivitiesAsync();
         Task<Activity?> GetByIdAsync(int id);
         Task<Activity> CreateAsync(Activity activity);
-        Task DeleteAsync(int id);  
+        Task<Activity?> UpdateAsync(int id, Activity activity);
+        Task DeleteAsync(int id);
+        
+
     }
 }
