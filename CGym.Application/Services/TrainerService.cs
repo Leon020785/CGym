@@ -16,5 +16,10 @@ namespace CGym.Application.Services
         {
             return await _trainerRepository.GetTrainersAsync();
         }
+        public async Task CreateTrainerAsync(Trainer trainer)
+        {
+            await _trainerRepository.AddAsync(trainer);
+
+        }
     }
 }

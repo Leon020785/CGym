@@ -1,5 +1,7 @@
 ﻿using CGym.Application.Interfaces;
+using CGym.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
+
 namespace CGym.API.Controllers
 {
     [ApiController]
@@ -12,8 +14,6 @@ namespace CGym.API.Controllers
         {
             _trainerService = trainerService;
         }
-            
-
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
@@ -21,5 +21,15 @@ namespace CGym.API.Controllers
             var trainers = await _trainerService.GetTrainersAsync();
             return Ok(trainers);
         }
+
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] CreateTrainerRequest request)
+        {
+            var trainer = new Trainer { Name = request.Name };
+            await _trainerService.CreateTrainerAsync(trainer);
+            return Ok(trainer);
+        }
     }
+
+    public record CreateTrainerRequest(string Name);
 }
