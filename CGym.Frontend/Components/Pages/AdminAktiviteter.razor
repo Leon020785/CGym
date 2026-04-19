@@ -1,12 +1,19 @@
 ﻿@page "/admin/aktiviteter"
 @rendermode InteractiveServer
 @inject CGym.Frontend.Services.ActivityService ActivityService
+@inject CGym.Frontend.Services.TrainerService TrainerService
+@using CGym.Frontend.Services
+
 
 <div class="aktiviteter-wrapper">
     <div class="page-header">
         <h2 class="page-title">Aktiviteter</h2>
     </div>
     <p class="page-sub">Administrer centerets aktiviteter</p>
+
+ 
+
+
 
     @if (!string.IsNullOrWhiteSpace(loadError))
     {
@@ -33,10 +40,48 @@
                     <span><i class="ti ti-users"></i> @activity.Enrolled/@activity.Capacity</span>
                 </div>
 
-                <div class="admin-actions">
-                    <button class="btn-edit" type="button" @onclick="() => StartRedigering(activity)">Rediger</button>
-                    <button class="btn-delete" @onclick="() => SletAktivitet(activity)">Slet aktivitet</button>
-                </div>
+                @if (isEditing && editingId == activity.Id)
+                {
+                    <div class="edit-card">
+                        <h3 class="edit-title">Rediger aktivitet</h3>
+
+                        <div class="form-group">
+                            <label>Aktivitetsnavn</label>
+                            <input @bind="editName" class="input-field" />
+                        </div>
+
+                        <div class="form-group">
+                            <label>Træner</label>
+                            <select @bind="editTrainerId" class="input-field">
+                                <option value="">Vælg en træner</option>
+                                @foreach (var t in trainers)
+                                {
+                                    <option value="@t.Id">@t.Name</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Tidspunkt</label>
+                            <input @bind="editStartTime" type="datetime-local" class="input-field" />
+                        </div>
+
+                        <div class="form-group">
+                            <label>Kapacitet</label>
+                            <input @bind="editCapacity" type="number" min="1" class="input-field" />
+                        </div>
+
+                        <button class="btn-save" type="button" @onclick="GemRedigering">Gem ændringer</button>
+                    </div>
+                }
+                else
+                {
+                    <div class="admin-actions">
+                        <button class="btn-edit" type="button" @onclick="() => StartRedigering(activity)">Rediger</button>
+                        <button class="btn-delete" @onclick="() => SletAktivitet(activity)">Slet aktivitet</button>
+                    </div>
+                }
+
             </div>
         }
     </div>
@@ -76,6 +121,68 @@
         font-size: 14px;
         margin: 0 0 20px 0;
     }
+
+    .edit-card {
+        background: white;
+        border-radius: 14px;
+        padding: 20px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+    .edit-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #111827;
+        margin: 0;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+        .form-group label {
+            font-size: 14px;
+            font-weight: 500;
+            color: #374151;
+        }
+
+    .input-field {
+        width: 100%;
+        padding: 12px 16px;
+        border: 1.5px solid #e5e7eb;
+        border-radius: 10px;
+        font-size: 15px;
+        outline: none;
+        box-sizing: border-box;
+    }
+
+        .input-field:focus {
+            border-color: #2563eb;
+        }
+
+    .btn-save {
+        width: 100%;
+        padding: 14px;
+        background: #2563eb;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+        .btn-save:hover {
+            background: #1d4ed8;
+        }
+
 
     .activity-list {
         display: flex;
@@ -173,10 +280,10 @@
         pointer-events: none;
     }
 
-        .toast.show {
-            opacity: 1;
-            transform: translateX(-50%) translateY(0);
-        }
+     toast.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
 </style>
 
 @code {
@@ -185,6 +292,14 @@
     private bool showToast = false;
     private string? loadError;
     private List<ActivityItem> activities = new();
+    private List<TrainerApiModel> trainers = new();
+    private bool isEditing = false;
+    private int editingId;
+    private string editName = "";
+    private int editCapacity = 0;
+    private DateTime? editStartTime;
+    private int? editTrainerId;
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -192,12 +307,14 @@
         {
             loadError = null;
 
+            trainers = await TrainerService.GetTrainersAsync();
             var apiActivities = await ActivityService.GetActivitiesAsync();
 
             activities = apiActivities
                 .Select(a => new ActivityItem(
                     a.Id,
                     a.Name,
+                    a.Trainer?.Id ?? 0,
                     a.Trainer?.Name ?? "Ikke angivet",
                     a.StartTime.ToString("dd-MM-yyyy"),
                     a.StartTime.ToString("HH:mm"),
@@ -210,13 +327,16 @@
         {
             loadError = "Kunne ikke hente aktiviteter lige nu.";
             activities = new();
+            trainers = new();
         }
         catch
         {
             loadError = "Der skete en uventet fejl ved indlæsning af aktiviteter.";
             activities = new();
+            trainers = new();
         }
     }
+
 
     private async Task SletAktivitet(ActivityItem activity)
     {
@@ -244,13 +364,78 @@
 
     private void StartRedigering(ActivityItem activity)
     {
-        toastIcon = "ti-circle-check";
-        message = $"Du redigerer nu: {activity.Name}";
+        isEditing = true;
+        editingId = activity.Id;
+        editName = activity.Name;
+        editCapacity = activity.Capacity;
+        editTrainerId = activity.TrainerId;
+        editStartTime = DateTime.ParseExact(
+            $"{activity.Date} {activity.Time}",
+            "dd-MM-yyyy HH:mm",
+            System.Globalization.CultureInfo.InvariantCulture);
+    }
+
+    private async Task GemRedigering()
+    {
+        if (string.IsNullOrWhiteSpace(editName) ||
+            !editStartTime.HasValue ||
+            editCapacity <= 0 ||
+            !editTrainerId.HasValue)
+        {
+            toastIcon = "ti-alert-triangle";
+            message = "Udfyld alle felter korrekt.";
+            showToast = true;
+            return;
+        }
+
+        var request = new CreateActivityRequest
+        {
+            Name = editName.Trim(),
+            StartTime = editStartTime.Value,
+            Capacity = editCapacity,
+            TrainerId = editTrainerId.Value
+        };
+
+        try
+        {
+            await ActivityService.UpdateActivityAsync(editingId, request);
+            isEditing = false;
+
+            // genindlæs listen, så UI viser nyeste data
+            var apiActivities = await ActivityService.GetActivitiesAsync();
+            activities = apiActivities
+                .Select(a => new ActivityItem(
+                    a.Id,
+                    a.Name,
+                    a.Trainer?.Id ?? 0,
+                    a.Trainer?.Name ?? "Ikke angivet",
+                    a.StartTime.ToString("dd-MM-yyyy"),
+                    a.StartTime.ToString("HH:mm"),
+                    a.Capacity,
+                    0,
+                    "#16a34a"))
+                .ToList();
+
+            toastIcon = "ti-circle-check";
+            message = "Aktivitet opdateret.";
+        }
+        catch
+        {
+            toastIcon = "ti-alert-triangle";
+            message = "Kunne ikke opdatere aktivitet lige nu.";
+        }
+
         showToast = true;
+        StateHasChanged();
+        await Task.Delay(3000);
+        showToast = false;
+        message = "";
+        StateHasChanged();
     }
 
 
-    private record ActivityItem(int Id, string Name, string Instructor, string Date, string Time, int Capacity, int Enrolled, string Color)
+
+    private record ActivityItem(int Id, string Name, int TrainerId, string Instructor, string Date, string Time, int Capacity, int Enrolled, string Color)
     {
         public int SpotsLeft => Capacity - Enrolled;
     }

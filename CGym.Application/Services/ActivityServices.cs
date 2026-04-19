@@ -30,6 +30,12 @@ namespace CGym.Application.Services
             return activity;
         }
 
+        public Task<Activity?> UpdateAsync(int id, Activity activity)
+        {
+            return _activityRepository.UpdateAsync(id, activity);
+        }
+
+
         public async Task DeleteAsync(int id)
         {
             await _activityRepository.DeleteAsync(id); 

@@ -34,6 +34,23 @@ namespace CGym.Infrastructure.Repositories
             await _context.SaveChangesAsync();
         }
 
+        public async Task<Activity?> UpdateAsync(int id, Activity activity)
+        {
+            var existing = await _context.Activities.FirstOrDefaultAsync(a => a.Id == id);
+
+            if (existing == null)
+                return null;
+
+            existing.Name = activity.Name;
+            existing.StartTime = activity.StartTime;
+            existing.Capacity = activity.Capacity;
+            existing.TrainerId = activity.TrainerId;
+
+            await _context.SaveChangesAsync();
+            return await GetByIdAsync(id);
+        }
+
+
         public async Task DeleteAsync(int id)
         {
             var activity = await _context.Activities.FindAsync(id);

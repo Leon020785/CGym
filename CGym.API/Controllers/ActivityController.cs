@@ -43,6 +43,18 @@ namespace CGym.API.Controllers
             return Ok(created);
         }
 
+        // PUT update activity
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] Activity activity)
+        {
+            var updated = await _activityService.UpdateAsync(id, activity);
+
+            if (updated == null)
+                return NotFound();
+
+            return Ok(updated);
+        }
+
         // DELETE activity
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)

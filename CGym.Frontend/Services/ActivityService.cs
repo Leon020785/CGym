@@ -24,6 +24,14 @@ namespace CGym.Frontend.Services
             return await response.Content.ReadFromJsonAsync<ActivityApiModel>(); 
         }
 
+        public async Task<ActivityApiModel?> UpdateActivityAsync(int id, CreateActivityRequest request)
+        {
+            var response = await _http.PutAsJsonAsync($"api/activity/{id}", request);
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<ActivityApiModel>();
+        }
+
+
         public async Task DeleteActivityAsync (int id)
         {
             var response = await _http.DeleteAsync($"api/activity/{id}");
@@ -42,6 +50,7 @@ namespace CGym.Frontend.Services
     public class ActivityTrainerApiModel
     {
         public string Name { get; set; } = "";
+        public int Id { get; set; }
     }
 
     public class CreateActivityRequest
