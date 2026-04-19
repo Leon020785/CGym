@@ -23,6 +23,12 @@ namespace CGym.Frontend.Services
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<ActivityApiModel>(); 
         }
+
+        public async Task DeleteActivityAsync (int id)
+        {
+            var response = await _http.DeleteAsync($"api/activity/{id}");
+            response.EnsureSuccessStatusCode();
+        }
     }
 
     public class ActivityApiModel
