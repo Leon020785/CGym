@@ -71,23 +71,6 @@
         </div>
     </div>
 
-    <!-- Aktivitetsliste -->
-    @if (aktiviteter.Count > 0)
-    {
-        <div class="activity-list">
-            <h3 class="list-title">Oprettede aktiviteter</h3>
-            @foreach (var a in aktiviteter)
-            {
-                <div class="activity-item">
-                    <div>
-                        <div class="activity-name">@a.Navn</div>
-                        <div class="activity-detail"><i class="ti ti-user"></i> @a.Instruktør · <i class="ti ti-clock"></i> @a.Tidspunkt · <i class="ti ti-users"></i> 0/@a.Kapacitet</div>
-                    </div>
-                    <button class="btn-delete" @onclick="() => SletAktivitet(a)"><i class="ti ti-x"></i></button>
-                </div>
-            }
-        </div>
-    }
 </div>
 
 <style>
@@ -305,20 +288,44 @@
         margin-top: 4px;
     }
 
-    .btn-delete {
-        background: none;
+    .admin-actions {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+
+    .btn-edit {
+        padding: 8px 12px;
         border: none;
-        color: #9ca3af;
-        font-size: 16px;
+        border-radius: 8px;
+        background: #2563eb;
+        color: white;
+        font-size: 13px;
+        font-weight: 600;
         cursor: pointer;
-        padding: 4px 8px;
-        border-radius: 6px;
-        transition: color 0.2s;
+        transition: background 0.2s;
+    }
+
+        .btn-edit:hover {
+            background: #1d4ed8;
+        }
+
+    .btn-delete {
+        padding: 8px 12px;
+        border: none;
+        border-radius: 8px;
+        background: #dc2626;
+        color: white;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
     }
 
         .btn-delete:hover {
-            color: #ef4444;
+            background: #b91c1c;
         }
+
 </style>
 
 @code {
@@ -340,11 +347,24 @@
         try
         {
             trainers = await TrainerService.GetTrainersAsync();
+
+            var apiActivities = await ActivityService.GetActivitiesAsync();
+
+            aktiviteter = apiActivities
+                .Select(a => new AktivitetItem(
+                    a.Id,
+                    a.Name,
+                    a.Trainer?.Name ?? "Ikke angivet",
+                    a.StartTime.ToString("dd-MM-yyyy HH:mm"),
+                    a.Capacity))
+                .ToList();
+
+                totalAktiviteter = aktiviteter.Count; 
         }
         catch
         {
             success = false;
-            message = "Kunne ikke hente træner.";
+            message = "Kunne ikke hente data.";
         }
 
     }
@@ -387,13 +407,23 @@
 
     }
 
-    private void SletAktivitet(AktivitetItem a)
+    private async Task SletAktivitet(AktivitetItem a)
     {
-        aktiviteter.Remove(a);
-        totalAktiviteter--;
-        message = $"{a.Navn} er slettet";
-        success = false;
+        try
+        {
+            await ActivityService.DeleteActivityAsync(a.Id);
+            aktiviteter.Remove(a);
+            totalAktiviteter = aktiviteter.Count;
+            success = true;
+            message = $"{a.Navn} er slettet.";
+        }
+        catch
+        {
+            success = false;
+            message = "Kunne ikke slette aktivitet via API.";
+        }
     }
 
-    private record AktivitetItem(string Navn, string Instruktør, string Tidspunkt, int Kapacitet);
+
+    private record AktivitetItem(int Id, string Navn, string Trainer, string Tidspunkt, int Kapacitet);
 }
