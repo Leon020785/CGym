@@ -16,7 +16,7 @@
                     <div class="booking-name">@booking.Name</div>
                     <button class="btn-close" @onclick="() => AflysBooking(booking)"><i class="ti ti-x"></i></button>
                 </div>
-                <div class="booking-detail"><i class="ti ti-user"></i> @booking.Instructor</div>
+                <div class="booking-detail"><i class="ti ti-user"></i> @booking.Trainer</div>
                 <div class="booking-detail"><i class="ti ti-calendar"></i> @booking.Date</div>
                 <div class="booking-detail"><i class="ti ti-clock"></i> @booking.Time</div>
                 <button class="btn-aflys" @onclick="() => AflysBooking(booking)">
@@ -232,5 +232,5 @@
         StateHasChanged();
     }
 
-    private record BookingItem(int Id, string Name, string Instructor, string Date, string Time, string Color);
+    private record BookingItem(int Id, string Name, string Trainer, string Date, string Time, string Color);
 }

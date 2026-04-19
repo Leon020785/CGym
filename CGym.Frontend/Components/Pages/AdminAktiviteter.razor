@@ -1,16 +1,12 @@
-﻿@page "/aktiviteter"
+﻿@page "/admin/aktiviteter"
 @rendermode InteractiveServer
-@inject CGym.Frontend.Services.BookingService BookingService
 @inject CGym.Frontend.Services.ActivityService ActivityService
-@inject CGym.Frontend.Services.AuthService AuthService
-@inject CGym.Frontend.Services.MemberService MemberService
 
 <div class="aktiviteter-wrapper">
     <div class="page-header">
-        <a href="/" class="back-btn">← </a>
         <h2 class="page-title">Aktiviteter</h2>
     </div>
-    <p class="page-sub">Find og book dine yndlings træningshold</p>
+    <p class="page-sub">Administrer centerets aktiviteter</p>
 
     @if (!string.IsNullOrWhiteSpace(loadError))
     {
@@ -30,16 +26,17 @@
                         @activity.SpotsLeft pladser
                     </div>
                 </div>
+
                 <div class="activity-info">
-                    <span><i class="ti ti-clock"></i> @activity.Time</span>
                     <span><i class="ti ti-calendar"></i> @activity.Date</span>
+                    <span><i class="ti ti-clock"></i> @activity.Time</span>
                     <span><i class="ti ti-users"></i> @activity.Enrolled/@activity.Capacity</span>
                 </div>
 
-                    <button class="btn-book" @onclick="() => BookHold(activity)">
-                        Book hold
-                    </button>
-                
+                <div class="admin-actions">
+                    <button class="btn-edit" type="button" @onclick="() => StartRedigering(activity)">Rediger</button>
+                    <button class="btn-delete" @onclick="() => SletAktivitet(activity)">Slet aktivitet</button>
+                </div>
             </div>
         }
     </div>
@@ -65,12 +62,6 @@
         align-items: center;
         gap: 12px;
         margin-bottom: 4px;
-    }
-
-    .back-btn {
-        font-size: 20px;
-        color: #111827;
-        text-decoration: none;
     }
 
     .page-title {
@@ -132,23 +123,40 @@
         color: #6b7280;
     }
 
-    .btn-book {
-        width: 100%;
+    .admin-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 6px;
+    }
+
+    .btn-edit,
+    .btn-delete {
+        flex: 1;
         padding: 14px;
-        background: #16a34a;
-        color: white;
         border: none;
         border-radius: 10px;
         font-size: 15px;
         font-weight: 600;
         cursor: pointer;
+        color: white;
         transition: background 0.2s;
     }
 
-    
-    .btn-book:hover {
-        background: #15803d;
+    .btn-edit {
+        background: #2563eb;
     }
+
+        .btn-edit:hover {
+            background: #1d4ed8;
+        }
+
+    .btn-delete {
+        background: #dc2626;
+    }
+
+        .btn-delete:hover {
+            background: #b91c1c;
+        }
 
     .toast {
         position: fixed;
@@ -210,51 +218,20 @@
         }
     }
 
-    private async Task BookHold(ActivityItem activity)
+    private async Task SletAktivitet(ActivityItem activity)
     {
         try
         {
-            var email = AuthService.CurrentEmail;
+            await ActivityService.DeleteActivityAsync(activity.Id);
+            activities.Remove(activity);
 
-            if (string.IsNullOrWhiteSpace(email))
-            {
-                toastIcon = "ti-alert-triangle";
-                message = "Du skal være logget ind for at booke.";
-            }
-            else
-            {
-                var members = await MemberService.GetMembersAsync();
-                var memberId = members
-                    .FirstOrDefault(m => m.Email.Equals(email, StringComparison.OrdinalIgnoreCase))
-                    ?.Id;
-
-                if (memberId is null)
-                {
-                    toastIcon = "ti-alert-triangle";
-                    message = "Der findes ingen member-profil for denne bruger.";
-                }
-                else
-                {
-                    await BookingService.CreateBookingAsync(memberId.Value, activity.Id);
-                    toastIcon = "ti-circle-check";
-                    message = $"Du har booket {activity.Name}!";
-                }
-            }
-        }
-        catch (InvalidOperationException ex)
-        {
-            toastIcon = "ti-alert-triangle";
-            message = ex.Message;
-        }
-        catch (HttpRequestException)
-        {
-            toastIcon = "ti-alert-triangle";
-            message = "Kunne ikke gennemføre booking lige nu.";
+            toastIcon = "ti-circle-check";
+            message = $"{activity.Name} er slettet.";
         }
         catch
         {
             toastIcon = "ti-alert-triangle";
-            message = "Der skete en uventet fejl.";
+            message = "Kunne ikke slette aktivitet lige nu.";
         }
 
         showToast = true;
@@ -265,8 +242,15 @@
         StateHasChanged();
     }
 
+    private void StartRedigering(ActivityItem activity)
+    {
+        toastIcon = "ti-circle-check";
+        message = $"Du redigerer nu: {activity.Name}";
+        showToast = true;
+    }
 
-    private record ActivityItem(int Id, string Name, string Instructor, string Time,String Date, int Capacity, int Enrolled, string Color)
+
+    private record ActivityItem(int Id, string Name, string Instructor, string Date, string Time, int Capacity, int Enrolled, string Color)
     {
         public int SpotsLeft => Capacity - Enrolled;
     }
