@@ -3,6 +3,8 @@
 @rendermode InteractiveServer
 @inject ActivityService ActivityService
 @inject TrainerService TrainerService
+@inject AuthService AuthService
+@inject NavigationManager Nav
 
 
 <div class="admin-wrapper">
@@ -344,6 +346,11 @@
 
     protected override async Task OnInitializedAsync()
     {
+        if (!AuthService.IsAdmin)
+        {
+            Nav.NavigateTo("/admin/login");
+            return;
+        }
         try
         {
             trainers = await TrainerService.GetTrainersAsync();
@@ -359,7 +366,7 @@
                     a.Capacity))
                 .ToList();
 
-                totalAktiviteter = aktiviteter.Count; 
+        totalAktiviteter = aktiviteter.Count; 
         }
         catch
         {

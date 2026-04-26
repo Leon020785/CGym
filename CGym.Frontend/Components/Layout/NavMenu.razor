@@ -32,7 +32,7 @@
         }
         else
         {
-            <NavLink href="/admin/login" class="nav-item"><span class="material-symbols-outlined">shield_person</span> Login Admin</NavLink>
+            <NavLink href="/admin/login" class="admin-link">Admin Login </NavLink>
         }
     </div>
 </nav>
@@ -53,7 +53,8 @@
         }
         else
         {
-            <NavLink href="/admin/login" class="mobile-item" @onclick="CloseMenu"><span class="material-symbols-outlined">shield_person</span> Login Admin</NavLink>
+            <NavLink href="/admin/login" class="admin-link" @onclick="CloseMenu">Admin Login </NavLink>
+        }
         }
     </div>
 }
@@ -175,6 +176,19 @@
         text-align: left;
     }
 
+    /* Admin link - subtle */
+    .admin-link {
+        font-size: 0.75rem;
+        color: #374151;
+        text-decoration: none;
+        opacity: 0.4;
+    }
+
+        .admin-link:hover {
+            opacity: 1;
+            color: #16a34a;
+        }
+
     /* Responsive */
     @@media (max-width: 768px) {
         .nav-links.desktop {
@@ -196,12 +210,17 @@
 
     protected override void OnInitialized()
     {
-        Auth.OnChange += StateHasChanged;
+        Auth.OnChange += HandleAuthChanged;
     }
 
     public void Dispose()
     {
-        Auth.OnChange -= StateHasChanged;
+        Auth.OnChange -= HandleAuthChanged;
+    }
+
+    private void HandleAuthChanged()
+    {
+        _ = InvokeAsync(StateHasChanged); 
     }
 
     private void ToggleMenu() => menuOpen = !menuOpen;
