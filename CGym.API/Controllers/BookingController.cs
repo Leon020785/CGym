@@ -24,8 +24,25 @@ namespace CGym.API.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateBooking([FromQuery] int memberId, [FromQuery] int activityId)
         {
-            var booking = await _bookingService.CreateBookingAsync(memberId, activityId);
-            return Ok(booking);
+            try
+            {
+                var booking = await _bookingService.CreateBookingAsync(memberId, activityId);
+                return Ok(booking);
+            }
+            catch (InvalidOperationException ex)
+            {
+                var danskBesked = ex.Message switch
+                {
+                    "Member has already booked this activity." => "Du er allerede tilmeldt dette hold.",
+                    "Activity is full." => "Dette hold er desværre fuldt.",
+                    _ => ex.Message
+                };
+                return BadRequest(new { detail = danskBesked });
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound(new { detail = "Aktivitet eller medlem blev ikke fundet." });
+            }
         }
 
         [HttpDelete("{id:int}")]

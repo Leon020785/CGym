@@ -152,17 +152,19 @@
 
     .toast {
         position: fixed;
-        bottom: 24px;
+        top: 24px;
         left: 50%;
-        transform: translateX(-50%) translateY(20px);
+        transform: translateX(-50%) translateY(-20px);
         background: #111827;
         color: white;
-        padding: 12px 24px;
+        padding: 16px 32px;
         border-radius: 10px;
-        font-size: 14px;
+        font-size: 15px;
         opacity: 0;
         transition: all 0.3s;
         pointer-events: none;
+        z-index: 9999;
+        white-space: nowrap;
     }
 
         .toast.show {
@@ -259,7 +261,7 @@
 
         showToast = true;
         StateHasChanged();
-        await Task.Delay(3000);
+        await Task.Delay(5000);
         showToast = false;
         message = "";
         StateHasChanged();
