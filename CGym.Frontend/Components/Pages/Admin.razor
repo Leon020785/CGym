@@ -20,43 +20,79 @@
 
     <!-- Opret aktivitet -->
     <div class="create-card">
-        <div class="create-header">
-            <div class="create-icon">+</div>
+        <button type="button" class="create-header create-card-toggle" @onclick="() => showCreateActivityForm = !showCreateActivityForm">
+            <div class="create-icon">
+                <i class="ti ti-calendar-plus"></i>
+            </div>
             <h3 class="create-title">Opret ny aktivitet</h3>
-        </div>
+            <span class="create-arrow">
+                <i class="@(showCreateActivityForm ? "ti ti-chevron-up" : "ti ti-chevron-down")"></i>
+            </span>
+        </button>
 
-        <div class="form-group">
-            <label>Aktivitetsnavn</label>
-            <input @bind="navn" placeholder="f.eks. HIIT Training" class="input-field" />
-        </div>
+        @if (showCreateActivityForm)
+        {
+            <div class="form-group">
+                <label>Aktivitetsnavn</label>
+                <input @bind="navn" placeholder="f.eks. HIIT Training" class="input-field" />
+            </div>
 
-        <select @bind="selectedTrainerId" class="input-field">
-            <option value =""> Vælg en træner</option>
-            @foreach (var t in trainers)
+            <select @bind="selectedTrainerId" class="input-field">
+                <option value=""> Vælg en træner</option>
+                @foreach (var t in trainers)
+                {
+                    <option value="@t.Id">@t.Name</option>
+                }
+
+            </select>
+
+            <div class="form-group">
+                <label>Tidspunkt</label>
+                <input @bind="startDatoTid" type="datetime-local" class="input-field" />
+            </div>
+
+            <div class="form-group">
+                <label>Kapacitet</label>
+                <input @bind="kapacitet" type="number" min="1" step="1" placeholder="f.eks. 15" class="input-field" />
+            </div>
+
+            @if (!string.IsNullOrEmpty(message))
             {
-                <option value="@t.Id">@t.Name</option>
+                <p class="@(success ? "success-msg" : "error-msg")">@message</p>
             }
 
-        </select>
-
-        <div class="form-group">
-            <label>Tidspunkt</label>
-            <input @bind="startDatoTid" type="datetime-local" class="input-field"/>
-        </div>
-
-        <div class="form-group">
-            <label>Kapacitet</label>
-            <input @bind="kapacitet" type="number" min="1" step="1" placeholder="f.eks. 15" class="input-field" />
-        </div>
-
-        @if (!string.IsNullOrEmpty(message))
-        {
-            <p class="@(success ? "success-msg" : "error-msg")">@message</p>
+            <button class="btn-opret" @onclick="OpretAktivitet">
+                Opret aktivitet
+            </button>
         }
 
-        <button class="btn-opret" @onclick="OpretAktivitet">
-            Opret aktivitet
+        <button type="button" class="create-header create-card-toggle trainer-toggle" @onclick="() => showCreateTrainerFrom = !showCreateTrainerFrom">
+            <div class="create-icon">
+                <i class="ti ti-user-plus"></i>
+            </div>
+            <h3 class="create-title">Opret ny træner</h3>
+            <span class="create-arrow">
+                <i class="@(showCreateTrainerFrom ? "ti ti-chevron-up" : "ti ti-chevron-down")"></i>
+            </span>
         </button>
+
+        @if (showCreateTrainerFrom)
+        {
+            <div class="form-group">
+                <label>Trænernavn</label>
+                <input @bind="trainerName" placeholder="f.eks. Hans Hansen" class="input-field" />
+            </div>
+
+            @if (!string.IsNullOrEmpty(trainerMessage))
+            {
+                <p class="success-msg">@trainerMessage</p>
+            }
+
+            <button class="btn-opret" @onclick="OpretTraener">
+                Opret træner 
+            </button>
+        }
+
     </div>
 
     <!-- Stats -->
@@ -136,6 +172,36 @@
         align-items: center;
         gap: 12px;
         margin-bottom: 4px;
+    }
+
+    /*This makes the header look like part of the card*/ 
+    .create-card-toggle {
+        width: 100%;
+        background: #16a34a;
+        color: white;
+        border: 0;
+        outline: none;
+        border-radius: 10px;
+        padding: 14px;
+        cursor: pointer;
+        justify-content: flex-start;
+        text-align: left;
+        transition: background 0.2s;
+        appearance: none;
+    }
+
+    .create-card-toggle:hover {
+        background: #15803d;
+    }
+
+    .create-card-toggle .create-title {
+        flex: 1;
+    }
+
+    .create-arrow {
+        font-size: 16px;
+        font-weight: 700;
+        color: white;
     }
 
     .create-icon {
@@ -336,6 +402,9 @@
     private string message = "";
     private bool success = false;
     private bool showCreateActivityForm = false;
+    private bool showCreateTrainerFrom = false;
+    private string trainerName = "";
+    private string trainerMessage = "";
     private int totalAktiviteter = 12;
     private int totalBookinger = 48;
     private int? selectedTrainerId;
@@ -367,7 +436,7 @@
                     a.Capacity))
                 .ToList();
 
-        totalAktiviteter = aktiviteter.Count; 
+            totalAktiviteter = aktiviteter.Count; 
         }
         catch
         {
@@ -413,6 +482,32 @@
             message = "Kunne ikke oprette aktivitet via API.";
         }
 
+    }
+
+    private async Task OpretTraener()
+    {
+        if (string.IsNullOrWhiteSpace(trainerName))
+        {
+            trainerMessage = "skrive et trænernavn";
+            return;
+        }
+
+        try
+        {
+            var createTrainer = await TrainerService.CreateTrainerAsync(trainerName.Trim());
+
+            if (createTrainer != null)
+            {
+                trainers.Add(createTrainer);
+            }
+
+            trainerMessage = $"{trainerName} er oprettet!";
+            trainerName = ""; 
+        }
+        catch
+        {
+            trainerMessage = "Kunne ikke oprette træner via API";
+        }
     }
 
     private async Task SletAktivitet(AktivitetItem a)
