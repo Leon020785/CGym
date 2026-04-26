@@ -83,6 +83,15 @@
                 <input @bind="trainerName" placeholder="f.eks. Hans Hansen" class="input-field" />
             </div>
 
+            <select @bind="selectedTrainerActivityId" class="input-field">
+                <option value="">vælg aktivitet</option>
+                @foreach (var a in aktiviteter)
+                {
+                    <option value= "@a.Id">@a.Navn - @a.Tidspunkt</option>
+                }
+                }
+            </select>
+
             @if (!string.IsNullOrEmpty(trainerMessage))
             {
                 <p class="success-msg">@trainerMessage</p>
@@ -405,6 +414,7 @@
     private bool showCreateTrainerFrom = false;
     private string trainerName = "";
     private string trainerMessage = "";
+    private int? selectedTrainerActivityId; 
     private int totalAktiviteter = 12;
     private int totalBookinger = 48;
     private int? selectedTrainerId;
@@ -432,6 +442,7 @@
                     a.Id,
                     a.Name,
                     a.Trainer?.Name ?? "Ikke angivet",
+                    a.StartTime,
                     a.StartTime.ToString("dd-MM-yyyy HH:mm"),
                     a.Capacity))
                 .ToList();
@@ -492,17 +503,54 @@
             return;
         }
 
+        if (!selectedTrainerActivityId.HasValue)
+        {
+            trainerMessage = "vælg en aktivitet";
+            return; 
+        }
+
         try
         {
             var createTrainer = await TrainerService.CreateTrainerAsync(trainerName.Trim());
 
-            if (createTrainer != null)
+            if (createTrainer == null)
             {
-                trainers.Add(createTrainer);
+                trainerMessage = "Træner blev ikke oprettet korrekt"; 
+                return; 
+            }
+            trainers.Add(createTrainer);
+
+            var selectedActivity = aktiviteter.FirstOrDefault(a => a.Id == selectedTrainerActivityId.Value);
+
+            if (selectedActivity == null)
+            {
+                trainerMessage = "Den valgt aktivitet blev ikke fundet";
+                return; 
             }
 
-            trainerMessage = $"{trainerName} er oprettet!";
-            trainerName = ""; 
+            var updateRequest = new CreateActivityRequest
+                {
+                    Name = selectedActivity.Navn,
+                    StartTime = selectedActivity.StartTime,
+                    Capacity = selectedActivity.Kapacitet,
+                    TrainerId = createTrainer.Id
+                };
+
+            await ActivityService.UpdateActivityAsync(selectedActivity.Id, updateRequest);
+
+            var index = aktiviteter.FindIndex(a => a.Id == selectedActivity.Id);
+
+            if (index >= 0)
+            {
+                aktiviteter[index] = selectedActivity with
+                    {
+                        Trainer = createTrainer.Name
+                    };
+            }
+
+                trainerMessage = $"{createTrainer.Name} er oprettet og koblet til {selectedActivity.Navn}.";
+                trainerName = "";
+                selectedTrainerActivityId = null;
         }
         catch
         {
@@ -528,5 +576,5 @@
     }
 
 
-    private record AktivitetItem(int Id, string Navn, string Trainer, string Tidspunkt, int Kapacitet);
+    private record AktivitetItem(int Id, string Navn, string Trainer,DateTime StartTime, string Tidspunkt, int Kapacitet);
 }
