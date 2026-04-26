@@ -15,5 +15,7 @@ namespace CGym.Application.Interfaces
 
         Task AddAsync(Trainer trainer);
         Task UpdateAsync(Trainer trainer);
+        Task DeleteAsync(int id);
+
     }
 }

@@ -1,0 +1,398 @@
+﻿@page "/admin/traenere"
+@rendermode InteractiveServer
+@using CGym.Frontend.Services
+@inject TrainerService TrainerService
+@inject AuthService AuthService
+@inject NavigationManager Nav
+
+<div class="trainers-wrapper">
+    <h2 class="page-title">Trænere</h2>
+    <p class="page-sub">Administrer centerets trænere</p>
+
+    @if (!string.IsNullOrEmpty(message))
+    {
+        <div class="toast @(showToast ? "show" : "")">
+            <i class="ti @toastIcon"></i> @message
+        </div>
+}
+
+
+    @if (trainers.Count == 0)
+    {
+        <p class="empty-msg">Ingen trænere fundet.</p>
+    }
+    else
+    {
+        <div class="trainer-list">
+
+            @foreach (var trainer in trainers)
+            {
+                <div class="trainer-card">
+                    <div class="trainer-top">
+                        <div>
+                            <div class="trainer-name">@trainer.Name</div>
+                            <div class="trainer-role"><i class="ti ti-user"></i>Træner</div>
+                        </div>
+
+                        <div class="trainer-status">
+                            aktiv
+                        </div>
+                    </div>
+
+                    @if (isEditing && editingTrainerId == trainer.Id)
+                    {
+                        <div class="edit-card">
+                            <h3 class="edit-title">Rediger træner</h3>
+
+                            <div class="form-group">
+                                <label>Trænernavn</label>
+                                <input @bind="editTrainerName" class="input-field" />
+                            </div>
+
+                            <div class="edit-actions">
+                                <button class="btn-save" type="button" @onclick="GemRedigering">Gem ændringer</button>
+                                <button class="btn-cancel" type="button" @onclick="AnnullerRedigering">Annuller</button>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="trainer-actions">
+                            <button class="btn-edit" type="button" @onclick="() => StartRedigering(trainer)">Rediger</button>
+                            <button class="btn-delete" type="button" @onclick="() => SletTraener(trainer)">Slet træner</button>
+                        </div>
+                    }
+
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<style>
+    .trainers-wrapper {
+        padding: 24px 16px;
+        max-width: 800px;
+        margin: 0 auto;
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    .page-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: #111827;
+        margin-bottom: 16px;
+    }
+    .page-sub {
+        color: #6b7280;
+        font-size: 14px;
+        margin: 0 0 20px 0;
+    }
+
+    .trainer-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .trainer-card {
+        background: white;
+        border-radius: 14px;
+        padding: 20px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        border-top: 4px solid #16a34a;
+
+    }
+
+    .trainer-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+    }
+
+    .trainer-name {
+        font-size: 17px;
+        font-weight: 700;
+        color: #111827;
+    }
+
+    .trainer-role {
+        font-size: 13px;
+        color: #6b7280;
+        margin-top: 4px;
+    }
+
+    .trainer-status {
+        font-size: 13px;
+        font-weight: 600;
+        color: #16a34a;
+    }
+
+    .trainer-actions {
+        display: flex;
+        gap: 8px;
+    }
+
+    .btn-edit,
+    .btn-delete{
+        flex: 1;
+        padding: 14px;
+        border: none;
+        border-radius: 10px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        color: white;
+        transition: background 0.2s;
+    }
+
+    .btn-edit {
+        background: #2563eb;
+    }
+
+    .btn-edit:hover {
+        background: #1d4ed8;
+    }
+
+    .btn-delete {
+        background: #dc2626;
+    }
+
+    .btn-delete:hover {
+        background: #b91c1c;
+    }
+
+    .error-msg {
+        color: #ef4444;
+        font-size: 14px;
+    }
+
+    .empty-msg {
+        color: #6b7280;
+        font-size: 15px;
+    }
+
+    .toast {
+        position: fixed;
+        bottom: 24px;
+        left: 50%;
+        transform: translateX(-50%) translateY(20px);
+        background: #111827;
+        color: white;
+        padding: 12px 24px;
+        border-radius: 10px;
+        font-size: 14px;
+        opacity: 0;
+        transition: all 0.3s;
+        pointer-events: none;
+        z-index: 200;
+    }
+
+    .toast.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+
+    .edit-card {
+        background: white;
+        border-radius: 14px;
+        padding: 20px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-top: 6px;
+    }
+
+    .edit-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #111827;
+        margin: 0;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .form-group label {
+        font-size: 14px;
+        font-weight: 500;
+        color: #374151;
+    }
+
+    .input-field {
+        width: 100%;
+        padding: 12px 16px;
+        border: 1.5px solid #e5e7eb;
+        border-radius: 10px;
+        font-size: 15px;
+        outline: none;
+        box-sizing: border-box;
+    }
+
+    .input-field:focus {
+        border-color: #2563eb;
+    }
+
+    .edit-actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    .btn-save,
+    .btn-cancel {
+        flex: 1;
+        padding: 14px;
+        border: none;
+        border-radius: 10px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        color: white;
+    }
+
+    .btn-save {
+        background: #2563eb;
+    }
+
+    .btn-cancel {
+        background: #6b7280;
+    }
+
+
+</style>
+
+
+@code {
+    private List<TrainerApiModel> trainers = new();
+    private string message = "";
+    private string toastIcon = "ti-alert-triangle";
+    private bool showToast = false;
+    private bool isEditing = false;
+    private int editingTrainerId;
+    private string editTrainerName = "";
+
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!AuthService.IsAdmin)
+        {
+            Nav.NavigateTo("/admin/login");
+            return;
+        }
+
+        try
+        {
+            trainers = await TrainerService.GetTrainersAsync();
+        }
+        catch
+        {
+            message = "Kunne ikke hente trænere.";
+        }
+    }
+
+    private void StartRedigering(TrainerApiModel trainer)
+    {
+        isEditing = true;
+        editingTrainerId = trainer.Id;
+        editTrainerName = trainer.Name;
+    }
+
+    private void AnnullerRedigering()
+    {
+        isEditing = false;
+        editingTrainerId = 0;
+        editTrainerName = "";
+    }
+
+    private async Task GemRedigering()
+    {
+        if (string.IsNullOrWhiteSpace(editTrainerName))
+        {
+            toastIcon = "ti-alert-triangle";
+            message = "Skriv et trænernavn.";
+            showToast = true;
+            return;
+        }
+
+        try
+        {
+            var updatedTrainer = await TrainerService.UpdateTrainerAsync(
+                editingTrainerId,
+                editTrainerName.Trim()
+            );
+
+            if (updatedTrainer == null)
+            {
+                toastIcon = "ti-alert-triangle";
+                message = "Træner blev ikke opdateret korrekt.";
+                showToast = true;
+                return;
+            }
+
+            var index = trainers.FindIndex(t => t.Id == updatedTrainer.Id);
+
+            if (index >= 0)
+            {
+                trainers[index] = updatedTrainer;
+            }
+
+            isEditing = false;
+            editingTrainerId = 0;
+            editTrainerName = "";
+
+            toastIcon = "ti-circle-check";
+            message = "Træner opdateret.";
+        }
+        catch
+        {
+            toastIcon = "ti-alert-triangle";
+            message = "Kunne ikke opdatere træner.";
+        }
+
+        showToast = true;
+        StateHasChanged();
+
+        await Task.Delay(3000);
+
+        showToast = false;
+        message = "";
+        StateHasChanged();
+    }
+
+
+
+    private async Task SletTraener(TrainerApiModel trainer)
+    {
+        try
+        {
+            await TrainerService.DeleteTrainerAsync(trainer.Id);
+            trainers.Remove(trainer);
+
+            toastIcon = "ti-circle-check";
+            message = $"{trainer.Name} er slettet.";
+        }
+        catch
+        {
+            toastIcon = "ti-alert-triangle";
+            message = "Kunne ikke slette træner.";
+        }
+
+        showToast = true;
+        StateHasChanged();
+
+        await Task.Delay(3000);
+
+        showToast = false;
+        message = "";
+        StateHasChanged();
+
+    }
+}

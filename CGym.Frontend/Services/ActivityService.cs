@@ -58,6 +58,6 @@ namespace CGym.Frontend.Services
         public string Name { get; set; } = "";
         public DateTime StartTime { get; set; }
         public int Capacity { get; set; }
-        public int TrainerId { get; set; }
+        public int? TrainerId { get; set; }
     }
 }

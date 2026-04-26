@@ -24,6 +24,14 @@
         {
             <NavLink href="@(Auth.IsAdmin ? "/admin" : "/")" Match="NavLinkMatch.All" class="nav-item"><i class="ti ti-home-2"></i> Home</NavLink>
             <NavLink href="@(Auth.IsAdmin ? "/admin/aktiviteter" : "/aktiviteter")" class="nav-item"><i class="ti ti-list"></i> Aktiviteter</NavLink>
+
+            @if (Auth.IsAdmin)
+            {
+                <NavLink href="/admin/traenere" class="nav-item">
+                    <i class="ti ti-users"></i> Træner
+                </NavLink>
+            }
+
             @if (!Auth.IsAdmin)
             {
                 <NavLink href="/bookinger" class="nav-item"><i class="ti ti-calendar-plus"></i> Bookinger</NavLink>
@@ -45,6 +53,14 @@
         {
             <NavLink href="@(Auth.IsAdmin ? "/admin" : "/")" Match="NavLinkMatch.All" class="mobile-item" @onclick="CloseMenu"><i class="ti ti-home-2"></i> Home</NavLink>
             <NavLink href="@(Auth.IsAdmin ? "/admin/aktiviteter" : "/aktiviteter")" class="mobile-item" @onclick="CloseMenu"><i class="ti ti-list"></i> Aktiviteter</NavLink>
+            
+            @if (Auth.IsAdmin)
+            {
+                <NavLink href="/admin/traenere" class="nav-item">
+                    <i class="ti ti-users"></i> Træner
+                </NavLink>
+            }
+
             @if (!Auth.IsAdmin)
             {
                 <NavLink href="/bookinger" class="mobile-item" @onclick="CloseMenu"><i class="ti ti-calendar-plus"></i> Bookinger</NavLink>
