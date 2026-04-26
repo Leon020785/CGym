@@ -13,6 +13,18 @@
         {
             return await _http.GetFromJsonAsync<List<TrainerApiModel>>("api/trainer") ?? new();
         }
+
+        public async Task<TrainerApiModel?> CreateTrainerAsync(string name)
+        {
+            var response = await _http.PostAsJsonAsync("api/trainer", new
+            {
+                name
+
+            });
+            response.EnsureSuccessStatusCode();
+
+            return await response.Content.ReadFromJsonAsync<TrainerApiModel>();
+        }
     }
 
     public class TrainerApiModel
