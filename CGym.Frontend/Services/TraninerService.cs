@@ -25,6 +25,25 @@
 
             return await response.Content.ReadFromJsonAsync<TrainerApiModel>();
         }
+
+        public async Task<TrainerApiModel?> UpdateTrainerAsync(int id, string name)
+        {
+            var response = await _http.PutAsJsonAsync($"api/trainer/{id}", new
+            {
+                name
+            });
+
+            response.EnsureSuccessStatusCode();
+
+            return await response.Content.ReadFromJsonAsync<TrainerApiModel>();
+        }
+
+        public async Task DeleteTrainerAsync(int id)
+        {
+            var response = await _http.DeleteAsync($"api/trainer/{id}");
+            response.EnsureSuccessStatusCode();
+        }
+
     }
 
     public class TrainerApiModel

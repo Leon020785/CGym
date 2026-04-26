@@ -21,5 +21,30 @@ namespace CGym.Application.Services
             await _trainerRepository.AddAsync(trainer);
 
         }
+
+        public async Task<Trainer?> UpdateTrainerAsync(int id, Trainer trainer)
+        {
+            var existing = await _trainerRepository.GetTrainerAsync(id);
+
+            if (existing == null)
+                return null;
+
+            existing.Name = trainer.Name;
+
+            await _trainerRepository.UpdateAsync(existing);
+
+            return existing;
+        }
+
+        public async Task DeleteTrainerAsync(int id)
+        {
+            var existing = await _trainerRepository.GetTrainerAsync(id);
+
+            if (existing == null)
+                throw new KeyNotFoundException("Trainer not found");
+
+            await _trainerRepository.DeleteAsync(id);
+        }
+
     }
 }

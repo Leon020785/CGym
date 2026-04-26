@@ -29,6 +29,27 @@ namespace CGym.API.Controllers
             await _trainerService.CreateTrainerAsync(trainer);
             return Ok(trainer);
         }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] CreateTrainerRequest request)
+        {
+            var trainer = new Trainer { Name = request.Name };
+
+            var updated = await _trainerService.UpdateTrainerAsync(id, trainer);
+
+            if (updated == null)
+                return NotFound();
+
+            return Ok(updated);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            await _trainerService.DeleteTrainerAsync(id);
+            return NoContent();
+        }
+
     }
 
     public record CreateTrainerRequest(string Name);

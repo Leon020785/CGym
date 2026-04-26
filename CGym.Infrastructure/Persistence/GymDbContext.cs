@@ -17,10 +17,14 @@ namespace CGym.Infrastructure.Persistence
         public DbSet<Trainer> Trainers { get; set; }
         public DbSet<Booking> Bookings { get; set; }
 
-
-
-
-
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Activity>()
+                .HasOne(a => a.Trainer)
+                .WithMany(t => t.Activities)
+                .HasForeignKey(a => a.TrainerId)
+                .OnDelete(DeleteBehavior.SetNull);
+        }
 
     }
 }

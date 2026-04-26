@@ -35,5 +35,17 @@ namespace CGym.Infrastructure.Repositories
             _context.Trainers.Update(trainer);
             await _context.SaveChangesAsync();
         }
+
+        public async Task DeleteAsync(int id)
+        {
+            var trainer = await _context.Trainers.FindAsync(id);
+
+            if (trainer != null)
+            {
+                _context.Trainers.Remove(trainer);
+                await _context.SaveChangesAsync();
+            }
+        }
+
     }
 }
