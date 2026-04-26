@@ -5,6 +5,11 @@
 @inject TrainerService TrainerService
 @inject AuthService AuthService
 @inject NavigationManager Nav
+@inject MemberService MemberService
+@inject BookingService BookingService
+
+
+
 
 
 <div class="admin-wrapper">
@@ -18,112 +23,158 @@
         <p class="hero-text">Her styrer du centerets hold og aktiviteter</p>
     </div>
 
-    <!-- Opret aktivitet -->
-    <div class="create-card">
-        <button type="button" class="create-header create-card-toggle" @onclick="() => showCreateActivityForm = !showCreateActivityForm">
-            <div class="create-icon">
-                <i class="ti ti-calendar-plus"></i>
-            </div>
-            <h3 class="create-title">Opret ny aktivitet</h3>
-            <span class="create-arrow">
-                <i class="@(showCreateActivityForm ? "ti ti-chevron-up" : "ti ti-chevron-down")"></i>
-            </span>
-        </button>
+    <div class="dashboard-top-grid">
+        <div class="dashboard-left">
+            <!-- Opret aktivitet -->
+            <div class="create-card">
+                <button type="button" class="create-header create-card-toggle" @onclick="() => showCreateActivityForm = !showCreateActivityForm">
+                    <div class="create-icon">
+                        <i class="ti ti-calendar-plus"></i>
+                    </div>
+                    <h3 class="create-title">Opret ny aktivitet</h3>
+                    <span class="create-arrow">
+                        <i class="@(showCreateActivityForm ? "ti ti-chevron-up" : "ti ti-chevron-down")"></i>
+                    </span>
+                </button>
 
-        @if (showCreateActivityForm)
-        {
-            <div class="form-group">
-                <label>Aktivitetsnavn</label>
-                <input @bind="navn" placeholder="f.eks. HIIT Training" class="input-field" />
-            </div>
-
-            <select @bind="selectedTrainerId" class="input-field">
-                <option value=""> Vælg en træner</option>
-                @foreach (var t in trainers)
+                @if (showCreateActivityForm)
                 {
-                    <option value="@t.Id">@t.Name</option>
+                    <div class="form-group">
+                        <label>Aktivitetsnavn</label>
+                        <input @bind="navn" placeholder="f.eks. HIIT Training" class="input-field" />
+                    </div>
+
+                    <select @bind="selectedTrainerId" class="input-field">
+                        <option value=""> Vælg en træner</option>
+                        @foreach (var t in trainers)
+                        {
+                            <option value="@t.Id">@t.Name</option>
+                        }
+
+                    </select>
+
+                    <div class="form-group">
+                        <label>Tidspunkt</label>
+                        <input @bind="startDatoTid" type="datetime-local" class="input-field" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Kapacitet</label>
+                        <input @bind="kapacitet" type="number" min="1" step="1" placeholder="f.eks. 15" class="input-field" />
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(message))
+                    {
+                        <p class="@(success ? "success-msg" : "error-msg")">@message</p>
+                    }
+
+                    <button class="btn-opret" @onclick="OpretAktivitet">
+                        Opret aktivitet
+                    </button>
                 }
 
-            </select>
+                <button type="button" class="create-header create-card-toggle trainer-toggle" @onclick="() => showCreateTrainerFrom = !showCreateTrainerFrom">
+                    <div class="create-icon">
+                        <i class="ti ti-user-plus"></i>
+                    </div>
+                    <h3 class="create-title">Opret ny træner</h3>
+                    <span class="create-arrow">
+                        <i class="@(showCreateTrainerFrom ? "ti ti-chevron-up" : "ti ti-chevron-down")"></i>
+                    </span>
+                </button>
 
-            <div class="form-group">
-                <label>Tidspunkt</label>
-                <input @bind="startDatoTid" type="datetime-local" class="input-field" />
-            </div>
-
-            <div class="form-group">
-                <label>Kapacitet</label>
-                <input @bind="kapacitet" type="number" min="1" step="1" placeholder="f.eks. 15" class="input-field" />
-            </div>
-
-            @if (!string.IsNullOrEmpty(message))
-            {
-                <p class="@(success ? "success-msg" : "error-msg")">@message</p>
-            }
-
-            <button class="btn-opret" @onclick="OpretAktivitet">
-                Opret aktivitet
-            </button>
-        }
-
-        <button type="button" class="create-header create-card-toggle trainer-toggle" @onclick="() => showCreateTrainerFrom = !showCreateTrainerFrom">
-            <div class="create-icon">
-                <i class="ti ti-user-plus"></i>
-            </div>
-            <h3 class="create-title">Opret ny træner</h3>
-            <span class="create-arrow">
-                <i class="@(showCreateTrainerFrom ? "ti ti-chevron-up" : "ti ti-chevron-down")"></i>
-            </span>
-        </button>
-
-        @if (showCreateTrainerFrom)
-        {
-            <div class="form-group">
-                <label>Trænernavn</label>
-                <input @bind="trainerName" placeholder="f.eks. Hans Hansen" class="input-field" />
-            </div>
-
-            <select @bind="selectedTrainerActivityId" class="input-field">
-                <option value="">vælg aktivitet</option>
-                @foreach (var a in aktiviteter)
+                @if (showCreateTrainerFrom)
                 {
-                    <option value= "@a.Id">@a.Navn - @a.Tidspunkt</option>
+                    <div class="form-group">
+                        <label>Trænernavn</label>
+                        <input @bind="trainerName" placeholder="f.eks. Hans Hansen" class="input-field" />
+                    </div>
+
+                    <select @bind="selectedTrainerActivityId" class="input-field">
+                        <option value="">vælg aktivitet</option>
+                        @foreach (var a in aktiviteter)
+                        {
+                            <option value="@a.Id">@a.Navn - @a.Tidspunkt</option>
+                        }
+                    </select>
+
+                    @if (!string.IsNullOrEmpty(trainerMessage))
+                    {
+                        <p class="success-msg">@trainerMessage</p>
+                    }
+
+                    <button class="btn-opret" @onclick="OpretTraener">
+                        Opret træner
+                    </button>
                 }
-                }
-            </select>
 
-            @if (!string.IsNullOrEmpty(trainerMessage))
-            {
-                <p class="success-msg">@trainerMessage</p>
-            }
+            </div>
 
-            <button class="btn-opret" @onclick="OpretTraener">
-                Opret træner 
-            </button>
-        }
+            <div class="stat-card green">
+                <span class="stat-icon"><i class="ti ti-user"></i></span>
+                <div class="stat-number">@totalMedlemmer</div>
+                <div class="stat-label">Totale medlemmer</div>
+            </div>
+        </div>
 
+        <div class="dashboard-right">
+            <div class="stat-card blue">
+                <span class="stat-icon"><i class="ti ti-trending-up"></i></span>
+                <div class="stat-number">@totalAktiviteter</div>
+                <div class="stat-label">Totale aktiviteter</div>
+            </div>
+
+            <div class="stat-card pink">
+                <span class="stat-icon"><i class="ti ti-calendar-plus"></i></span>
+                <div class="stat-number">@totalBookinger</div>
+                <div class="stat-label">Totale bookinger</div>
+            </div>
+        </div>
     </div>
 
-    <!-- Stats -->
-    <div class="stats-grid">
-        <div class="stat-card blue">
-            <span class="stat-icon"><i class="ti ti-trending-up"></i></span>
-            <div class="stat-number">@totalAktiviteter</div>
-            <div class="stat-label">Totale aktiviteter</div>
+    <div class="upcoming-card">
+        <div class="upcoming-header">
+            <div>
+                <h3 class="upcoming-title">Kommende aktiviteter</h3>
+                <p class="upcoming-subtitle">De næste 3 planlagte hold</p>
+            </div>
+            <i class="ti ti-calendar-event"></i>
         </div>
-        <div class="stat-card pink">
-            <span class="stat-icon"><i class="ti ti-users"></i></span>
-            <div class="stat-number">@totalBookinger</div>
-            <div class="stat-label">Totale bookinger</div>
-        </div>
+
+        @if (kommendeAktiviteter.Count == 0)
+        {
+            <p class="empty-upcoming">Ingen kommende aktiviteter.</p>
+        }
+        else
+        {
+            <div class="upcoming-list">
+                @foreach (var aktivitet in kommendeAktiviteter)
+                {
+                    <div class="upcoming-item">
+                        <div>
+                            <div class="upcoming-name">@aktivitet.Navn</div>
+                            <div class="upcoming-trainer">
+                                <i class="ti ti-user"></i> @aktivitet.Trainer
+                            </div>
+                        </div>
+
+                        <div class="upcoming-meta">
+                            <span><i class="ti ti-clock"></i> @aktivitet.Tidspunkt</span>
+                            <span><i class="ti ti-users"></i> @aktivitet.Kapacitet pladser</span>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
     </div>
+
 
 </div>
 
 <style>
     .admin-wrapper {
         padding: 24px 16px;
-        max-width: 800px;
+        max-width: 900px;
         margin: 0 auto;
         font-family: 'Segoe UI', sans-serif;
         display: flex;
@@ -151,10 +202,13 @@
     }
 
     .hero-banner {
-        background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 100%);
+        background-image: url("https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1200&q=80");
+        background-size: cover;
+        background-position: center 55%;
+        background-repeat: no-repeat;
         border-radius: 16px;
         padding: 40px 24px;
-        min-height: 120px;
+        min-height: 200px;
         display: flex;
         align-items: flex-end;
     }
@@ -164,7 +218,34 @@
         font-size: 16px;
         font-weight: 500;
         margin: 0;
+        text-shadow: 0 2px 8px rgba(0,0,0,0.75);
     }
+
+    .dashboard-top-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        align-items: stretch;
+    }
+
+    .dashboard-left,
+    .dashboard-right {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .dashboard-left > .create-card,
+    .dashboard-left > .stat-card,
+    .dashboard-right > .stat-card {
+        box-sizing: border-box;
+        min-height: 200px;
+    }
+
+    .dashboard-right > .stat-card {
+        flex: none;
+    }
+
 
     .create-card {
         background: white;
@@ -290,11 +371,84 @@
         margin: 0;
     }
 
-    .stats-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
+    .upcoming-card {
+        background: white;
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .upcoming-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+    }
+
+    .upcoming-header i {
+        font-size: 24px;
+        color: #16a34a;
+    }
+
+    .upcoming-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #111827;
+        margin: 0;
+    }
+
+    .upcoming-subtitle {
+        font-size: 13px;
+        color: #6b7280;
+        margin: 4px 0 0 0;
+    }
+
+    .upcoming-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .upcoming-item {
+        border-top: 4px solid #16a34a;
+        background: #f9fafb;
+        border-radius: 12px;
+        padding: 14px;
+        display: flex;
+        justify-content: space-between;
         gap: 12px;
     }
+
+    .upcoming-name {
+        font-size: 15px;
+        font-weight: 700;
+        color: #111827;
+    }
+
+    .upcoming-trainer {
+        font-size: 13px;
+        color: #6b7280;
+        margin-top: 4px;
+    }
+
+    .upcoming-meta {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        font-size: 13px;
+        color: #6b7280;
+        text-align: right;
+        white-space: nowrap;
+    }
+
+    .empty-upcoming {
+        color: #6b7280;
+        font-size: 14px;
+        margin: 0;
+    }
+
 
     .stat-card {
         border-radius: 14px;
@@ -303,15 +457,21 @@
         flex-direction: column;
         gap: 6px;
         color: white;
+        min-height: 150px;
     }
 
-        .stat-card.blue {
-            background: linear-gradient(135deg, #3b82f6, #6366f1);
-        }
+    .stat-card.green {
+        background: linear-gradient(135deg, #16a34a, #22c55e);
+    }
 
-        .stat-card.pink {
-            background: linear-gradient(135deg, #a855f7, #ec4899);
-        }
+
+    .stat-card.blue {
+        background: linear-gradient(135deg, #3b82f6, #6366f1);
+    }
+
+    .stat-card.pink {
+        background: linear-gradient(135deg, #a855f7, #ec4899);
+    }
 
     .stat-icon {
         font-size: 22px;
@@ -325,6 +485,12 @@
     .stat-label {
         font-size: 13px;
         opacity: 0.9;
+    }
+
+    @@media (max-width: 768px) {
+        .dashboard-top-grid {
+            grid-template-columns: 1fr;
+        }
     }
 
     .activity-list {
@@ -415,14 +581,18 @@
     private string trainerName = "";
     private string trainerMessage = "";
     private int? selectedTrainerActivityId; 
-    private int totalAktiviteter = 12;
-    private int totalBookinger = 48;
     private int? selectedTrainerId;
     private DateTime? startDatoTid;
+    private int totalMedlemmer = 0;
+    private int totalAktiviteter = 0;
+    private int totalBookinger = 0;
+
+
 
 
     private List<TrainerApiModel> trainers = new();
     private List<AktivitetItem> aktiviteter = new();
+    private List<AktivitetItem> kommendeAktiviteter = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -448,6 +618,19 @@
                 .ToList();
 
             totalAktiviteter = aktiviteter.Count; 
+
+            kommendeAktiviteter = aktiviteter
+                .Where(a => a.StartTime >= DateTime.Now)
+                .OrderBy(a => a.StartTime)
+                .Take(3)
+                .ToList();
+    
+            var members = await MemberService.GetMembersAsync();
+            totalMedlemmer = members?.Count ?? 0;
+
+            var bookings = await BookingService.GetBookingsAsync();
+            totalBookinger = bookings.Count;
+
         }
         catch
         {
