@@ -2,6 +2,8 @@
 @rendermode InteractiveServer
 @inject CGym.Frontend.Services.AuthService Auth
 @inject NavigationManager Nav
+@inject CGym.Frontend.Services.BookingService BookingService
+@inject CGym.Frontend.Services.ActivityService ActivityService
 
 @if (!string.IsNullOrEmpty(Auth.Token))
 {
@@ -24,12 +26,12 @@
         <div class="stats-grid">
             <div class="stat-card green">
                 <span class="stat-icon"><i class="ti ti-calendar"></i></span>
-                <div class="stat-number">5</div>
+                <div class="stat-number">@aktiveBookinger</div>
                 <div class="stat-label">Aktive bookinger</div>
             </div>
             <div class="stat-card white">
                 <span class="stat-icon"><i class="ti ti-clipboard-list"></i></span>
-                <div class="stat-number">12</div>
+                <div class="stat-number">@holdTilgaengelige</div>
                 <div class="stat-label">Hold tilgængelige</div>
             </div>
         </div>
@@ -39,7 +41,7 @@
             <span class="champion-icon"><i class="ti ti-trophy"></i></span>
             <div>
                 <div class="champion-title">Ugens mester! <i class="ti ti-confetti"></i></div>
-                <div class="champion-sub">Du har deltaget i 8 hold denne uge</div>
+                <div class="champion-sub">Du har deltaget i @ugensHold hold denne uge</div>
             </div>
         </div>
 
@@ -56,15 +58,15 @@
             <div class="progress-title"><i class="ti ti-trending-up"></i> Dine fremskridt</div>
             <div class="progress-row">
                 <span>Hold i denne måned</span>
-                <span class="progress-value">24</span>
+                <span class="progress-value">@holdDenneMaaned</span>
             </div>
             <div class="progress-row">
                 <span>Total træningsdage</span>
-                <span class="progress-value">87</span>
+                <span class="progress-value">@totalTraeningsdage</span>
             </div>
             <div class="progress-row">
                 <span>Favorit aktivitet</span>
-                <span class="progress-value green-text">HIIT Training</span>
+                <span class="progress-value green-text">@favoritAktivitet</span>
             </div>
         </div>
     </div>
@@ -253,7 +255,6 @@
         color: #16a34a;
     }
 
-    /* Ikke logget ind */
     .not-logged-in {
         min-height: 100vh;
         background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 50%, #bbf7d0 100%);
@@ -316,9 +317,41 @@
 </style>
 
 @code {
-    protected override void OnInitialized()
+    private int aktiveBookinger = 0;
+    private int holdTilgaengelige = 0;
+    private int holdDenneMaaned = 0;
+    private int totalTraeningsdage = 0;
+    private string favoritAktivitet = "Ingen endnu";
+    private int ugensHold = 0;
+
+    protected override async Task OnInitializedAsync()
     {
         if (string.IsNullOrEmpty(Auth.Token))
+        {
             Nav.NavigateTo("/login");
+            return;
+        }
+
+        var bookinger = await BookingService.GetBookingsAsync();
+        aktiveBookinger = bookinger.Count;
+        totalTraeningsdage = bookinger.Count;
+
+        var nu = DateTime.Now;
+        holdDenneMaaned = bookinger.Count(b =>
+            b.Activity?.StartTime.Month == nu.Month &&
+            b.Activity?.StartTime.Year == nu.Year);
+
+        ugensHold = bookinger.Count(b =>
+            b.Activity?.StartTime >= nu.AddDays(-(int)nu.DayOfWeek) &&
+            b.Activity?.StartTime <= nu);
+
+        var favorit = bookinger
+            .GroupBy(b => b.Activity?.Name)
+            .OrderByDescending(g => g.Count())
+            .FirstOrDefault();
+        favoritAktivitet = favorit?.Key ?? "Ingen endnu";
+
+        var aktiviteter = await ActivityService.GetActivitiesAsync();
+        holdTilgaengelige = aktiviteter.Count;
     }
 }
