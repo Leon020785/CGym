@@ -2,7 +2,7 @@
 @page "/admin"
 @rendermode InteractiveServer
 @inject ActivityService ActivityService
-@inject TrainerService TrainerService
+@inject CGym.Frontend.Services.TrainerService TrainerService
 @inject AuthService AuthService
 @inject NavigationManager Nav
 @inject MemberService MemberService
@@ -88,6 +88,44 @@
                     <div class="form-group">
                         <label>Trænernavn</label>
                         <input @bind="trainerName" placeholder="f.eks. Hans Hansen" class="input-field" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input @bind="trainerEmail" type="email" placeholder="f.eks. hans@cgym.dk" class="input-field" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Telefon</label>
+                        <input @bind="trainerPhoneNumber" type="tel" placeholder="f.eks. 12 34 56 78" class="input-field" />
+                    </div>
+
+                    <div class="form-group">
+                        <label>Tilgængelige dage</label>
+
+                        <div class="weekday-grid">
+                            @foreach (var day in weekDays)
+                            {
+                                <label class="weekday-option">
+                                    <input type="checkbox"
+                                           checked="@selectedWeekDays.Contains(day)"
+                                           @onchange="e => ToggleWeekDay(day, e)" />
+                                    <span>@day</span>
+                                </label>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="time-grid">
+                        <div class="form-group">
+                            <label>Fra kl.</label>
+                            <input @bind="availableFrom" placeholder="12:00" class="input-field" />
+                        </div>
+
+                        <div class="form-group">
+                            <label>Til kl.</label>
+                            <input @bind="availableTo" placeholder="20:00" class="input-field" />
+                        </div>
                     </div>
 
                     <select @bind="selectedTrainerActivityId" class="input-field">
@@ -569,6 +607,34 @@
             background: #b91c1c;
         }
 
+    .weekday-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+
+    .weekday-option {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px;
+        background: #f9fafb;
+        border: 1.5px solid #e5e7eb;
+        border-radius: 10px;
+        font-size: 14px;
+        color: #374151;
+    }
+
+        .weekday-option input {
+            accent-color: #16a34a;
+        }
+
+    .time-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
 </style>
 
 @code {
@@ -586,9 +652,23 @@
     private int totalMedlemmer = 0;
     private int totalAktiviteter = 0;
     private int totalBookinger = 0;
+    private string trainerEmail = "";
+    private string trainerPhoneNumber = "";
+    private string availableFrom = "";
+    private string availableTo = "";
 
+    private List<string> selectedWeekDays = new();
 
-
+    private readonly List<string> weekDays = new()
+    {
+        "Mandag",
+        "Tirsdag",
+        "Onsdag",
+        "Torsdag",
+        "Fredag",
+        "Lørdag",
+        "Søndag"
+    };
 
     private List<TrainerApiModel> trainers = new();
     private List<AktivitetItem> aktiviteter = new();
@@ -678,6 +758,30 @@
 
     }
 
+    private void ToggleWeekDay(string day, ChangeEventArgs e)
+    {
+        var isChecked = e.Value as bool? ?? false;
+
+        if (isChecked)
+        {
+            if (!selectedWeekDays.Contains(day))
+            {
+                selectedWeekDays.Add(day);
+            }
+        }
+        else
+        {
+            selectedWeekDays.Remove(day);
+        }
+    }
+
+    private string BuildTrainerAvailability()
+    {
+        var days = string.Join(", ", selectedWeekDays);
+        return $"{days} kl. {availableFrom}-{availableTo}";
+    }
+
+
     private async Task OpretTraener()
     {
         if (string.IsNullOrWhiteSpace(trainerName))
@@ -685,6 +789,17 @@
             trainerMessage = "skrive et trænernavn";
             return;
         }
+
+        if (string.IsNullOrWhiteSpace(trainerEmail) ||
+        string.IsNullOrWhiteSpace(trainerPhoneNumber) ||
+        selectedWeekDays.Count == 0 ||
+        string.IsNullOrWhiteSpace(availableFrom) ||
+        string.IsNullOrWhiteSpace(availableTo))
+        {
+            trainerMessage = "Udfyld email, telefon og tilgængelighed.";
+            return;
+        }
+
 
         if (!selectedTrainerActivityId.HasValue)
         {
@@ -694,7 +809,14 @@
 
         try
         {
-            var createTrainer = await TrainerService.CreateTrainerAsync(trainerName.Trim());
+            var availability = BuildTrainerAvailability();
+
+            var createTrainer = await TrainerService.CreateTrainerAsync(
+                trainerName.Trim(),
+                trainerEmail.Trim(),
+                trainerPhoneNumber.Trim(),
+                availability
+            );
 
             if (createTrainer == null)
             {
@@ -733,7 +855,13 @@
 
                 trainerMessage = $"{createTrainer.Name} er oprettet og koblet til {selectedActivity.Navn}.";
                 trainerName = "";
+                trainerEmail = "";
+                trainerPhoneNumber = "";
+                selectedWeekDays.Clear();
+                availableFrom = "";
+                availableTo = "";
                 selectedTrainerActivityId = null;
+
         }
         catch
         {

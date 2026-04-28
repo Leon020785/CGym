@@ -14,11 +14,18 @@
             return await _http.GetFromJsonAsync<List<TrainerApiModel>>("api/trainer") ?? new();
         }
 
-        public async Task<TrainerApiModel?> CreateTrainerAsync(string name)
+        public async Task<TrainerApiModel?> CreateTrainerAsync(
+            string name, 
+            string email, 
+            string phoneNumber, 
+            string availability)
         {
             var response = await _http.PostAsJsonAsync("api/trainer", new
             {
-                name
+                name,
+                email,
+                phoneNumber,
+                availability
 
             });
             response.EnsureSuccessStatusCode();
@@ -26,11 +33,19 @@
             return await response.Content.ReadFromJsonAsync<TrainerApiModel>();
         }
 
-        public async Task<TrainerApiModel?> UpdateTrainerAsync(int id, string name)
+        public async Task<TrainerApiModel?> UpdateTrainerAsync(
+            int id, 
+            string name, 
+            string email, 
+            string phoneNumber, 
+            string availability)
         {
             var response = await _http.PutAsJsonAsync($"api/trainer/{id}", new
             {
-                name
+                name,
+                email,
+                phoneNumber,
+                availability
             });
 
             response.EnsureSuccessStatusCode();
@@ -50,5 +65,9 @@
     {
         public int Id { get; set; }
         public string Name { get; set; } = "";
+        public string Email { get; set; } = "";
+        public string PhoneNumber { get; set; } = "";
+        public string Availability { get; set; } = "";
+
     }
 }

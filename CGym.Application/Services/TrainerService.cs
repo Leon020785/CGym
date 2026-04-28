@@ -29,7 +29,10 @@ namespace CGym.Application.Services
             if (existing == null)
                 return null;
 
-            existing.Name = trainer.Name;
+            existing.Name = trainer.Name ?? "";
+            existing.Email = trainer.Email ?? "";
+            existing.PhoneNumber = trainer.PhoneNumber ?? "";
+            existing.Availability = trainer.Availability ?? "";
 
             await _trainerRepository.UpdateAsync(existing);
 
