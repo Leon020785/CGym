@@ -25,7 +25,10 @@ namespace CGym.API.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateTrainerRequest request)
         {
-            var trainer = new Trainer { Name = request.Name };
+            var trainer = new Trainer { Name = request.Name,
+                                        Email = request.Email,
+                                        PhoneNumber = request.PhoneNumber,
+                                        Availability = request.Availability};
             await _trainerService.CreateTrainerAsync(trainer);
             return Ok(trainer);
         }
@@ -52,5 +55,5 @@ namespace CGym.API.Controllers
 
     }
 
-    public record CreateTrainerRequest(string Name);
+    public record CreateTrainerRequest(string Name, string Email, string PhoneNumber, string Availability);
 }
