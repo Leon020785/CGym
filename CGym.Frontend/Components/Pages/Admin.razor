@@ -53,9 +53,16 @@
 
                     </select>
 
-                    <div class="form-group">
-                        <label>Tidspunkt</label>
-                        <input @bind="startDatoTid" type="datetime-local" class="input-field" />
+                    <div class="time-grid">
+                        <div class="form-group">
+                            <label>Dato</label>
+                            <input @bind="aktivitetDato" placeholder="28-04-2026" class="input-field" />
+                        </div>
+
+                        <div class="form-group">
+                            <label>Kl.</label>
+                            <input @bind="aktivitetTid" placeholder="12:00" class="input-field" />
+                        </div>
                     </div>
 
                     <div class="form-group">
@@ -649,6 +656,8 @@
     private int? selectedTrainerActivityId; 
     private int? selectedTrainerId;
     private DateTime? startDatoTid;
+    private string aktivitetDato = "";
+    private string aktivitetTid = "";
     private int totalMedlemmer = 0;
     private int totalAktiviteter = 0;
     private int totalBookinger = 0;
@@ -723,7 +732,8 @@
     private async Task OpretAktivitet()
     {
         if (string.IsNullOrWhiteSpace(navn) ||
-            !startDatoTid.HasValue || 
+            string.IsNullOrWhiteSpace(aktivitetDato) ||
+            string.IsNullOrWhiteSpace(aktivitetTid) ||
             kapacitet <= 0 || 
             !selectedTrainerId.HasValue)
         {
@@ -732,10 +742,23 @@
             return;
         }
 
+        if (!DateTime.TryParseExact(
+                $"{aktivitetDato} {aktivitetTid}",
+                "dd-MM-yyyy HH:mm",
+                System.Globalization.CultureInfo.InvariantCulture,
+                System.Globalization.DateTimeStyles.None,
+                out var parsedStartDatoTid))
+        {
+            success = false;
+            message = "Dato og tid skal skrives som f.eks. 28-04-2026 og 12:00.";
+            return;
+        }
+
+
         var request = new CreateActivityRequest
         {
             Name = navn.Trim(),
-            StartTime = startDatoTid.Value,
+            StartTime = parsedStartDatoTid,
             Capacity = kapacitet,
             TrainerId = selectedTrainerId.Value
         }; 
@@ -750,6 +773,8 @@
             kapacitet = 0;
             selectedTrainerId = null;
             startDatoTid = null; 
+            aktivitetDato = "";
+            aktivitetTid = "";
         } catch
         {
             success = false; 
