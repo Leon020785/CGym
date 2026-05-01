@@ -43,7 +43,7 @@ namespace CGym.Frontend.Services
             return true;
         }
 
-        public async Task<bool> Register(string username, string email, string password)
+        public async Task<(bool Succeeded, string? ErrorMessage)> Register(string username, string email, string password)
         {
             var response = await _http.PostAsJsonAsync("api/auth/register", new
             {
@@ -51,7 +51,13 @@ namespace CGym.Frontend.Services
                 email,
                 password
             });
-            return response.IsSuccessStatusCode;
+            if (response.IsSuccessStatusCode)
+                return (true, null);
+
+            if (response.StatusCode == System.Net.HttpStatusCode.Conflict)
+                return (false, "Emailen er allerede i brug.");
+
+            return (false, "Noget gik galt. Prøv igen.");
         }
         public void Logout()
         {
