@@ -17,12 +17,6 @@
                 <div class="profile-name">@DisplayValue(firstName) @DisplayValue(lastName)</div>
             </div>
 
-            @if (!isLoadingProfile && !isEditing)
-            {
-                <button type="button" class="btn-profile-primary" @onclick="StartEditing">
-                    Rediger
-                </button>
-            }
         </div>
 
         @if (isLoadingProfile)
@@ -69,22 +63,25 @@
         }
         else
         {
-            <div class="profile-details">
-                <div class="profile-row">
-                    <span>Fornavn</span>
-                    <strong>@DisplayValue(firstName)</strong>
+            <div class="profile-form">
+                <div class="form-group">
+                    <label for="viewFirstName">Fornavn</label>
+                    <input id="viewFirstName" value="@DisplayValue(firstName)" type="text" class="input-field" readonly />
                 </div>
-                <div class="profile-row">
-                    <span>Efternavn</span>
-                    <strong>@DisplayValue(lastName)</strong>
+
+                <div class="form-group">
+                    <label for="viewLastName">Efternavn</label>
+                    <input id="viewLastName" value="@DisplayValue(lastName)" type="text" class="input-field" readonly />
                 </div>
-                <div class="profile-row">
-                    <span>Email</span>
-                    <strong>@DisplayValue(email)</strong>
+
+                <div class="form-group">
+                    <label for="viewEmail">Email</label>
+                    <input id="viewEmail" value="@DisplayValue(email)" type="email" class="input-field" readonly />
                 </div>
-                <div class="profile-row">
-                    <span>Telefon</span>
-                    <strong>@DisplayValue(phoneNumber)</strong>
+
+                <div class="form-group">
+                    <label for="viewPhoneNumber">Telefon</label>
+                    <input id="viewPhoneNumber" value="@DisplayValue(phoneNumber)" type="tel" class="input-field" readonly />
                 </div>
             </div>
 
@@ -92,6 +89,12 @@
             {
                 <p class="@(success ? "success-msg" : "error-msg")">@message</p>
             }
+
+            <div class="profile-view-actions">
+                <button type="button" class="btn-profile-primary" @onclick="StartEditing">
+                    Rediger
+                </button>
+            </div>
         }
     </div>
 </div>
@@ -231,6 +234,16 @@
             background: #f3f4f6;
             color: #6b7280;
         }
+
+        .input-field[readonly] {
+            background: #f9fafb;
+            cursor: default;
+        }
+
+    .profile-view-actions {
+        display: flex;
+        justify-content: flex-start;
+    }
 
     .profile-actions {
         display: grid;

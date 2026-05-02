@@ -41,13 +41,8 @@ namespace CGym.Infrastructure.Repositories
 
         public async Task<List<Member>> GetAllAsync()
         {
-            var adminEmails = await gymDbContext.Users
-                .Where(u => u.IsAdmin)
-                .Select(u => u.Email)
-                .ToHashSetAsync();
-
             return await gymDbContext.Members
-                .Where(m => !adminEmails.Contains(m.Email))
+                .Where(m => !gymDbContext.Users.Any(u => u.IsAdmin && u.Email == m.Email))
                 .ToListAsync();
         }
 

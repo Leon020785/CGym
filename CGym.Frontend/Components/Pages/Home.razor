@@ -19,22 +19,6 @@
             </div>
         </div>
 
-        <!-- Stats -->
-        <div class="stats-grid">
-            <div class="stat-card green" @onclick='() => Nav.NavigateTo("/bookinger")' style="cursor:pointer">
-                <span class="stat-icon"><i class="ti ti-calendar"></i></span>
-                <div class="stat-number">@aktiveBookinger</div>
-                <div class="stat-label">Aktive bookinger</div>
-                <div class="stat-hint">Klik for at se dine bookinger</div>
-            </div>
-            <div class="stat-card white" @onclick='() => Nav.NavigateTo("/aktiviteter")' style="cursor:pointer">
-                <span class="stat-icon"><i class="ti ti-clipboard-list"></i></span>
-                <div class="stat-number">@holdTilgaengelige</div>
-                <div class="stat-label">Hold tilgængelige</div>
-                <div class="stat-hint">Klik for at se tilgængelige hold</div>
-            </div>
-        </div>
-
         <!-- Ugens mester banner -->
         <div class="champion-banner">
             <span class="champion-icon"><i class="ti ti-trophy"></i></span>
@@ -44,17 +28,33 @@
             </div>
         </div>
 
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card green" @onclick='() => Nav.NavigateTo("/bookinger")' role="button" tabindex="0" @onkeydown="@(e => { if (e.Key == "Enter" || e.Key == " ") Nav.NavigateTo("/bookinger"); })" style="cursor:pointer">
+                <span class="stat-icon"><i class="ti ti-calendar"></i></span>
+                <div class="stat-number">@aktiveBookinger</div>
+                <div class="stat-label">Aktive bookinger</div>
+                <div class="stat-hint">Klik for at se dine bookinger</div>
+            </div>
+            <div class="stat-card white" @onclick='() => Nav.NavigateTo("/aktiviteter")' role="button" tabindex="0" @onkeydown="@(e => { if (e.Key == "Enter" || e.Key == " ") Nav.NavigateTo("/aktiviteter"); })" style="cursor:pointer">
+                <span class="stat-icon"><i class="ti ti-clipboard-list"></i></span>
+                <div class="stat-number">@holdTilgaengelige</div>
+                <div class="stat-label">Hold tilgængelige</div>
+                <div class="stat-hint">Klik for at se tilgængelige hold</div>
+            </div>
+        </div>
+
         <!-- Knapper -->
 
         <!-- Fremskridt -->
         <div class="progress-card">
             <div class="progress-title"><i class="ti ti-trending-up"></i> Dine fremskridt</div>
             <div class="progress-row">
-                <span>Hold i denne måned</span>
+                <span>Hold deltaget denne måned</span>
                 <span class="progress-value">@holdDenneMaaned</span>
             </div>
             <div class="progress-row">
-                <span>Total træningsdage</span>
+                <span>Hold deltaget i alt</span>
                 <span class="progress-value">@totalTraeningsdage</span>
             </div>
             <div class="progress-row">
@@ -359,7 +359,8 @@
             b.Activity?.StartTime <= nu);
 
         var favorit = bookinger
-            .GroupBy(b => b.Activity?.Name)
+            .Where(b => b.Activity?.Name != null)
+            .GroupBy(b => b.Activity!.Name)
             .OrderByDescending(g => g.Count())
             .FirstOrDefault();
         favoritAktivitet = favorit?.Key ?? "Ingen endnu";
