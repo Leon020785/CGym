@@ -52,19 +52,24 @@ public class AuthService
         return user;
     }
 
-    public string GenerateJwtToken(User user)
+    public string GenerateJwtToken(User user, int? memberId = null)
     {
         var key = new SymmetricSecurityKey(
             Encoding.UTF8.GetBytes("THIS_IS_MY_SUPER_SECRET_KEY_12345"));
 
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-        var claims = new[]
+        var claims = new List<Claim>
         {
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new Claim(ClaimTypes.Email, user.Email),
             new Claim(ClaimTypes.Role, user.IsAdmin ? "Admin" : "User")
         };
+
+        if (memberId.HasValue)
+        {
+            claims.Add(new Claim("MemberId", memberId.Value.ToString()));
+        }
 
         var token = new JwtSecurityToken(
             claims: claims,

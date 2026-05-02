@@ -35,6 +35,24 @@ namespace CGym.Application.Services
             return await _memberRepository.GetByIdAsync(id);
         }
 
+        // Henter ét medlem via email — returnerer null hvis ikke fundet
+        public async Task<Member?> GetByEmailAsync(string email)
+        {
+            return await _memberRepository.GetByEmailAsync(email);
+        }
+
+        // Opdaterer et medlems navn via ID
+        public async Task<Member?> UpdateAsync(int id, string firstName, string lastName, string phoneNumber)
+        {
+            return await _memberRepository.UpdateAsync(id, firstName, lastName, phoneNumber);
+        }
+
+        // Opdaterer email på både Member og den tilknyttede User i én transaktion
+        public async Task<Member?> UpdateEmailAsync(int memberId, string newEmail)
+        {
+            return await _memberRepository.UpdateEmailAsync(memberId, newEmail);
+        }
+
         // Sletter et medlem fra databasen via ID
         public async Task DeleteAsync(int id)
         {

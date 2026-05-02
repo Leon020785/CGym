@@ -56,7 +56,8 @@ namespace CGym.API.Controllers
                 return Unauthorized("Admin users must use the admin login endpoint");
             }
 
-            var token = _authService.GenerateJwtToken(user);
+            var memberId = await GetOrCreateMemberIdAsync(user.Username, user.Email);
+            var token = _authService.GenerateJwtToken(user, memberId);
 
             return Ok(new { token });
         }
@@ -79,9 +80,22 @@ namespace CGym.API.Controllers
                 return Unauthorized("Only admin users can log in through this endpoint");
             }
 
-            var token = _authService.GenerateJwtToken(user);
+            var member = await _memberService.GetByEmailAsync(user.Email);
+            var token = _authService.GenerateJwtToken(user, member?.Id);
 
             return Ok(new { token });
+        }
+
+        private async Task<int> GetOrCreateMemberIdAsync(string username, string email)
+        {
+            var member = await _memberService.GetByEmailAsync(email);
+
+            if (member == null)
+            {
+                member = await _memberService.CreateMemberAsync(username, "", email);
+            }
+
+            return member.Id;
         }
     }
 }

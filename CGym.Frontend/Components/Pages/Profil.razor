@@ -1,3 +1,456 @@
 @page "/profil"
+@inject CGym.Frontend.Services.AuthService Auth
+@inject CGym.Frontend.Services.MemberService Members
+@inject NavigationManager Nav
 
-<h1>Mine oplysninger</h1>
+<div class="profile-wrapper">
+    <div class="page-header">
+        <a href="/" class="back-btn">←</a>
+        <h2 class="page-title">Mine oplysninger</h2>
+    </div>
+    <p class="page-sub">Se og opdater dine medlemsoplysninger</p>
+
+    <div class="profile-card">
+        <div class="profile-top">
+            <div>
+                <div class="profile-kicker">Min profil</div>
+                <div class="profile-name">@DisplayValue(firstName) @DisplayValue(lastName)</div>
+            </div>
+
+            @if (!isLoadingProfile && !isEditing)
+            {
+                <button type="button" class="btn-profile-primary" @onclick="StartEditing">
+                    Rediger
+                </button>
+            }
+        </div>
+
+        @if (isLoadingProfile)
+        {
+            <p class="profile-status">Henter oplysninger...</p>
+        }
+        else if (isEditing)
+        {
+            <div class="profile-form">
+                <div class="form-group">
+                    <label for="firstName">Fornavn</label>
+                    <input id="firstName" @bind="editFirstName" type="text" class="input-field" />
+                </div>
+
+                <div class="form-group">
+                    <label for="lastName">Efternavn</label>
+                    <input id="lastName" @bind="editLastName" type="text" class="input-field" />
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input id="email" @bind="editEmail" type="email" class="input-field" />
+                </div>
+
+                <div class="form-group">
+                    <label for="phoneNumber">Telefon</label>
+                    <input id="phoneNumber" @bind="editPhoneNumber" type="tel" class="input-field" />
+                </div>
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(message))
+            {
+                <p class="@(success ? "success-msg" : "error-msg")">@message</p>
+            }
+
+            <div class="profile-actions">
+                <button type="button" class="btn-profile-primary" @onclick="SaveProfile" disabled="@isSaving">
+                    @(isSaving ? "Gemmer..." : "Gem ændringer")
+                </button>
+                <button type="button" class="btn-profile-outline" @onclick="CancelEditing" disabled="@isSaving">
+                    Annuller
+                </button>
+            </div>
+        }
+        else
+        {
+            <div class="profile-details">
+                <div class="profile-row">
+                    <span>Fornavn</span>
+                    <strong>@DisplayValue(firstName)</strong>
+                </div>
+                <div class="profile-row">
+                    <span>Efternavn</span>
+                    <strong>@DisplayValue(lastName)</strong>
+                </div>
+                <div class="profile-row">
+                    <span>Email</span>
+                    <strong>@DisplayValue(email)</strong>
+                </div>
+                <div class="profile-row">
+                    <span>Telefon</span>
+                    <strong>@DisplayValue(phoneNumber)</strong>
+                </div>
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(message))
+            {
+                <p class="@(success ? "success-msg" : "error-msg")">@message</p>
+            }
+        }
+    </div>
+</div>
+
+<style>
+    .profile-wrapper {
+        padding: 24px 16px;
+        max-width: 800px;
+        margin: 0 auto;
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    .page-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 4px;
+    }
+
+    .back-btn {
+        font-size: 20px;
+        color: #111827;
+        text-decoration: none;
+    }
+
+    .page-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: #111827;
+        margin: 0;
+    }
+
+    .page-sub {
+        color: #6b7280;
+        font-size: 14px;
+        margin: 0 0 20px 0;
+    }
+
+    .profile-card {
+        background: white;
+        border-radius: 14px;
+        padding: 20px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .profile-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .profile-kicker {
+        color: #16a34a;
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .profile-name {
+        font-size: 20px;
+        font-weight: 700;
+        color: #111827;
+    }
+
+    .profile-status {
+        color: #6b7280;
+        font-size: 15px;
+        margin: 0;
+    }
+
+    .profile-details {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .profile-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        font-size: 14px;
+        color: #374151;
+        border-bottom: 1px solid #f3f4f6;
+        padding-bottom: 8px;
+    }
+
+        .profile-row span {
+            color: #6b7280;
+        }
+
+        .profile-row strong {
+            color: #111827;
+            font-weight: 600;
+            text-align: right;
+            overflow-wrap: anywhere;
+        }
+
+    .profile-form {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+        .form-group label {
+            color: #374151;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+    .input-field {
+        width: 100%;
+        padding: 12px 16px;
+        border: 1.5px solid #e5e7eb;
+        border-radius: 10px;
+        color: #111827;
+        font-size: 15px;
+        outline: none;
+        transition: border-color 0.2s;
+        box-sizing: border-box;
+    }
+
+        .input-field:focus {
+            border-color: #16a34a;
+        }
+
+        .input-field.read-only {
+            background: #f3f4f6;
+            color: #6b7280;
+        }
+
+    .profile-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
+    .btn-profile-primary {
+        background: #16a34a;
+        color: white;
+        padding: 12px 24px;
+        border: none;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+        .btn-profile-primary:hover {
+            background: #15803d;
+            color: white;
+        }
+
+        .btn-profile-primary:disabled {
+            background: #86efac;
+            cursor: not-allowed;
+        }
+
+    .btn-profile-outline {
+        background: white;
+        color: #111827;
+        padding: 12px 24px;
+        border: 1.5px solid #e5e7eb;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: border-color 0.2s, color 0.2s;
+    }
+
+        .btn-profile-outline:hover {
+            border-color: #16a34a;
+            color: #16a34a;
+        }
+
+        .btn-profile-outline:disabled {
+            color: #9ca3af;
+            cursor: not-allowed;
+        }
+
+    .error-msg {
+        color: #dc2626;
+        font-size: 14px;
+        margin: 0;
+    }
+
+    .success-msg {
+        color: #16a34a;
+        font-size: 14px;
+        margin: 0;
+    }
+
+    @@media (max-width: 640px) {
+        .profile-card {
+            padding: 20px;
+        }
+
+        .profile-top,
+        .profile-row {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .profile-row strong {
+            text-align: left;
+        }
+
+        .profile-form,
+        .profile-actions {
+            grid-template-columns: 1fr;
+        }
+
+        .btn-profile-primary,
+        .btn-profile-outline {
+            width: 100%;
+        }
+    }
+</style>
+
+@code {
+    private int? memberId;
+    private string firstName = "";
+    private string lastName = "";
+    private string email = "";
+    private string phoneNumber = "";
+    private string editFirstName = "";
+    private string editLastName = "";
+    private string editEmail = "";
+    private string editPhoneNumber = "";
+    private string message = "";
+    private bool success;
+    private bool isLoadingProfile = true;
+    private bool isSaving;
+    private bool isEditing;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!Auth.IsAuthenticated || Auth.CurrentMemberId == null)
+        {
+            Nav.NavigateTo("/login");
+            return;
+        }
+
+        memberId = Auth.CurrentMemberId.Value;
+
+        try
+        {
+            var member = await Members.GetMemberAsync(memberId.Value);
+            firstName = member.FirstName;
+            lastName = member.LastName;
+            email = member.Email;
+            phoneNumber = member.PhoneNumber;
+            ResetEditValues();
+        }
+        catch
+        {
+            success = false;
+            message = "Kunne ikke hente dine oplysninger.";
+        }
+        finally
+        {
+            isLoadingProfile = false;
+        }
+    }
+
+    private void StartEditing()
+    {
+        message = "";
+        ResetEditValues();
+        isEditing = true;
+    }
+
+    private void CancelEditing()
+    {
+        message = "";
+        ResetEditValues();
+        isEditing = false;
+    }
+
+    private async Task SaveProfile()
+    {
+        if (memberId == null)
+        {
+            success = false;
+            message = "Du skal være logget ind for at gemme.";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(editFirstName) || string.IsNullOrWhiteSpace(editLastName))
+        {
+            success = false;
+            message = "Fornavn og efternavn skal udfyldes.";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(editEmail))
+        {
+            success = false;
+            message = "Email skal udfyldes.";
+            return;
+        }
+
+        isSaving = true;
+        message = "";
+
+        try
+        {
+            editFirstName = editFirstName.Trim();
+            editLastName = editLastName.Trim();
+            editEmail = editEmail.Trim();
+            editPhoneNumber = editPhoneNumber.Trim();
+
+            await Members.UpdateMemberAsync(memberId.Value, editFirstName, editLastName, editPhoneNumber);
+
+            if (!string.Equals(editEmail, email, StringComparison.OrdinalIgnoreCase))
+            {
+                await Members.UpdateEmailAsync(memberId.Value, editEmail);
+                email = editEmail;
+                Auth.UpdateCurrentEmail(editEmail);
+            }
+
+            firstName = editFirstName;
+            lastName = editLastName;
+            phoneNumber = editPhoneNumber;
+            isEditing = false;
+            success = true;
+            message = "Profilen er opdateret.";
+        }
+        catch
+        {
+            success = false;
+            message = "Kunne ikke gemme ændringerne.";
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private void ResetEditValues()
+    {
+        editFirstName = firstName;
+        editLastName = lastName;
+        editEmail = email;
+        editPhoneNumber = phoneNumber;
+    }
+
+    private static string DisplayValue(string value)
+    {
+        return string.IsNullOrWhiteSpace(value) ? "-" : value;
+    }
+}
