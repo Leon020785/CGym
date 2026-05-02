@@ -6,16 +6,23 @@
     <a href="@HomeHref" class="nav-brand"><i class="ti ti-barbell"></i> CGym</a>
 
     <!-- Hamburger knap (mobil) -->
-    <button class="hamburger" @onclick="ToggleMenu">
-        @if (menuOpen)
-        {
-            <i class="ti ti-x"></i>
-        }
-        else
-        {
-            <i class="ti ti-menu-2"></i>
-        }
-    </button>
+    @if (Auth.IsAuthenticated)
+    {
+        <button class="hamburger" @onclick="ToggleMenu">
+            @if (menuOpen)
+            {
+                <i class="ti ti-x"></i>
+            }
+            else
+            {
+                <i class="ti ti-menu-2"></i>
+            }
+        </button>
+    }
+    else
+    {
+        <a href="/admin/login" class="mobile-admin-link">/Admin/logIn</a>
+    }
 
     <!-- Desktop links -->
     <div class="nav-links desktop">
@@ -229,6 +236,16 @@
             color: #dc2626;
         }
 
+    /* Mobile-only admin link (unauthenticated state) */
+    .mobile-admin-link {
+        display: none;
+        font-size: 13px;
+        color: #374151;
+        text-decoration: none;
+        opacity: 0.5;
+        padding: 4px 8px;
+    }
+
     /* Hamburger */
     .hamburger {
         display: none;
@@ -309,6 +326,10 @@
 
         .mobile-menu {
             display: flex;
+        }
+
+        .mobile-admin-link {
+            display: block;
         }
     }
 </style>
