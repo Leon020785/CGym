@@ -8,13 +8,11 @@
 
 <div class="aktiviteter-wrapper">
     <div class="page-header">
+        <a href="/admin" class="back-btn">←</a>
         <h2 class="page-title">Aktiviteter</h2>
     </div>
+
     <p class="page-sub">Administrer centerets aktiviteter</p>
-
- 
-
-
 
     @if (!string.IsNullOrWhiteSpace(loadError))
     {
@@ -115,6 +113,12 @@
         font-weight: 700;
         color: #111827;
         margin: 0;
+    }
+
+    .back-btn {
+        font-size: 20px;
+        color: #111827;
+        text-decoration: none;
     }
 
     .page-sub {
