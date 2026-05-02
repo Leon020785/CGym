@@ -3,6 +3,7 @@ using CGym.Application.Services;
 using CGym.API.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using CGym.Application.Interfaces;
+using System.Security.Claims;
 
 namespace CGym.API.Controllers
 {
@@ -84,6 +85,21 @@ namespace CGym.API.Controllers
             var token = _authService.GenerateJwtToken(user, member?.Id);
 
             return Ok(new { token });
+        }
+
+        [Authorize]
+        [HttpPost("change-password")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
+        {
+            var email = User.FindFirstValue(ClaimTypes.Email);
+            if (email == null)
+                return Unauthorized();
+
+            var success = await _authService.ChangePasswordAsync(email, request.CurrentPassword, request.NewPassword);
+            if (!success)
+                return BadRequest("Nuværende adgangskode er forkert.");
+
+            return Ok("Adgangskode ændret.");
         }
 
         private async Task<int> GetOrCreateMemberIdAsync(string username, string email)
