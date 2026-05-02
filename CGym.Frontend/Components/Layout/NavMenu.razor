@@ -22,20 +22,34 @@
         @if (Auth.IsAuthenticated)
         {
             <NavLink href="@HomeHref" Match="NavLinkMatch.All" class="nav-item"><i class="ti ti-home-2"></i> Home</NavLink>
-            <NavLink href="@ActivityHref" class="nav-item"><i class="ti ti-list"></i> Aktiviteter</NavLink>
 
             @if (Auth.IsAdmin)
             {
+                <NavLink href="@ActivityHref" class="nav-item"><i class="ti ti-list"></i> Aktiviteter</NavLink>
                 <NavLink href="/admin/traenere" class="nav-item">
                     <i class="ti ti-users"></i> Træner
                 </NavLink>
+                <button class="btn-logout" @onclick="Logout">Log ud</button>
             }
 
             @if (!Auth.IsAdmin)
             {
-                <NavLink href="/bookinger" class="nav-item"><i class="ti ti-calendar-plus"></i> Bookinger</NavLink>
+                <div class="profile-menu">
+                    <button type="button" class="nav-item profile-button" @onclick="ToggleProfileMenu">
+                        <i class="ti ti-user-circle"></i> Min profil <i class="ti ti-chevron-down"></i>
+                    </button>
+
+                    @if (profileMenuOpen)
+                    {
+                        <div class="profile-nav-backdrop" @onclick="CloseProfileMenu"></div>
+                        <div class="profile-dropdown">
+                            <NavLink href="/profil" class="profile-dropdown-item" @onclick="CloseProfileMenu">Mine oplysninger</NavLink>
+                            <NavLink href="/changePassword" class="profile-dropdown-item" @onclick="CloseProfileMenu">Skift adgangskode</NavLink>
+                            <button type="button" class="profile-dropdown-item profile-logout" @onclick="Logout">Log ud</button>
+                        </div>
+                    }
+                </div>
             }
-            <button class="btn-logout" @onclick="Logout">Log ud</button>
         }
         else
         {
@@ -44,6 +58,11 @@
     </div>
 </nav>
 
+@if (profileMenuOpen)
+{
+    <div class="profile-page-backdrop" @onclick="CloseProfileMenu"></div>
+}
+
 <!-- Mobil dropdown menu -->
 @if (menuOpen)
 {
@@ -51,10 +70,10 @@
         @if (Auth.IsAuthenticated)
         {
             <NavLink href="@HomeHref" Match="NavLinkMatch.All" class="mobile-item" @onclick="CloseMenu"><i class="ti ti-home-2"></i> Home</NavLink>
-            <NavLink href="@ActivityHref" class="mobile-item" @onclick="CloseMenu"><i class="ti ti-list"></i> Aktiviteter</NavLink>
             
             @if (Auth.IsAdmin)
             {
+                <NavLink href="@ActivityHref" class="mobile-item" @onclick="CloseMenu"><i class="ti ti-list"></i> Aktiviteter</NavLink>
                 <NavLink href="/admin/traenere" class="nav-item">
                     <i class="ti ti-users"></i> Træner
                 </NavLink>
@@ -62,14 +81,21 @@
 
             @if (!Auth.IsAdmin)
             {
-                <NavLink href="/bookinger" class="mobile-item" @onclick="CloseMenu"><i class="ti ti-calendar-plus"></i> Bookinger</NavLink>
+                <button type="button" class="mobile-profile-button" @onclick="ToggleProfileMenu">
+                    <i class="ti ti-user-circle"></i> Min profil
+                </button>
+
+                @if (profileMenuOpen)
+                {
+                    <NavLink href="/profil" class="mobile-item mobile-profile-item" @onclick="CloseMenu">Mine oplysninger</NavLink>
+                    <NavLink href="/changePassword" class="mobile-item mobile-profile-item" @onclick="CloseMenu">Skift adgangskode</NavLink>
+                    <button type="button" class="mobile-logout" @onclick="Logout">Log ud</button>
+                }
             }
-            <button class="mobile-logout" @onclick="Logout">Log ud</button>
         }
         else
         {
             <NavLink href="/admin/login" class="admin-link" @onclick="CloseMenu">/AdminLogin </NavLink>
-        }
         }
     </div>
 }
@@ -136,6 +162,77 @@
             background: #dc2626;
         }
 
+    .profile-menu {
+        position: relative;
+    }
+
+    .profile-button {
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        position: relative;
+        z-index: 112;
+    }
+
+    .profile-page-backdrop {
+        position: fixed;
+        inset: 0;
+        background: transparent;
+        z-index: 98;
+    }
+
+    .profile-nav-backdrop {
+        position: fixed;
+        inset: 0;
+        background: transparent;
+        z-index: 105;
+    }
+
+    .profile-dropdown {
+        position: absolute;
+        top: calc(100% + 8px);
+        right: 0;
+        min-width: 190px;
+        padding: 8px;
+        background: white;
+        border: 1.5px solid #e5e7eb;
+        border-radius: 10px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.10);
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        z-index: 110;
+    }
+
+    .profile-dropdown-item {
+        width: 100%;
+        padding: 10px 12px;
+        border: none;
+        border-radius: 8px;
+        background: transparent;
+        color: #374151;
+        font-size: 14px;
+        font-weight: 500;
+        text-align: left;
+        text-decoration: none;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+        .profile-dropdown-item:hover, .profile-dropdown-item.active {
+            background: #f0fdf4;
+            color: #16a34a;
+        }
+
+    .profile-logout {
+        color: #ef4444;
+    }
+
+        .profile-logout:hover {
+            background: #fef2f2;
+            color: #dc2626;
+        }
+
     /* Hamburger */
     .hamburger {
         display: none;
@@ -191,6 +288,23 @@
         text-align: left;
     }
 
+    .mobile-profile-button {
+        padding: 14px 16px 6px 16px;
+        background: transparent;
+        border: none;
+        color: #111827;
+        font-size: 15px;
+        font-weight: 600;
+        text-align: left;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .mobile-profile-item {
+        padding-left: 32px;
+    }
+
     /* Admin link - subtle */
     .admin-link {
         font-size: 0.75rem;
@@ -222,6 +336,7 @@
 
 @code {
     private bool menuOpen = false;
+    private bool profileMenuOpen = false;
     private string HomeHref => Auth.IsAdmin ? "/admin" : "/";
     private string ActivityHref => Auth.IsAdmin ? "/admin/aktiviteter" : "/aktiviteter";
 
@@ -241,12 +356,19 @@
     }
 
     private void ToggleMenu() => menuOpen = !menuOpen;
-    private void CloseMenu() => menuOpen = false;
+    private void ToggleProfileMenu() => profileMenuOpen = !profileMenuOpen;
+    private void CloseProfileMenu() => profileMenuOpen = false;
+    private void CloseMenu()
+    {
+        menuOpen = false;
+        profileMenuOpen = false;
+    }
 
     private void Logout()
     {
         Auth.Logout();
         menuOpen = false;
+        profileMenuOpen = false;
         Nav.NavigateTo("/login");
     }
 }
