@@ -1,6 +1,7 @@
 ﻿using CGym.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 
 namespace CGym.API.Controllers
@@ -51,12 +52,13 @@ namespace CGym.API.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateMemberRequest request)
         {
-            var member = await _memberService.UpdateAsync(
-                id,
-                request.FirstName,
-                request.LastName,
-                request.PhoneNumber);
+            var isAdmin = User.FindFirstValue(ClaimTypes.Role) == "Admin";
+            var memberIdClaim = User.FindFirstValue("MemberId");
 
+            if (!isAdmin && (memberIdClaim == null || memberIdClaim != id.ToString()))
+                return Forbid();
+
+            var member = await _memberService.UpdateAsync(id, request.FirstName, request.LastName, request.PhoneNumber);
             if (member == null) return NotFound();
             return Ok(member);
         }
@@ -65,6 +67,12 @@ namespace CGym.API.Controllers
         [HttpPut("{id}/email")]
         public async Task<IActionResult> UpdateEmail(int id, [FromBody] UpdateEmailRequest request)
         {
+            var isAdmin = User.FindFirstValue(ClaimTypes.Role) == "Admin";
+            var memberIdClaim = User.FindFirstValue("MemberId");
+
+            if (!isAdmin && (memberIdClaim == null || memberIdClaim != id.ToString()))
+                return Forbid();
+
             var member = await _memberService.UpdateEmailAsync(id, request.NewEmail);
             if (member == null) return NotFound();
             return Ok(member);
