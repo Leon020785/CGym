@@ -52,6 +52,20 @@ public class AuthService
         return user;
     }
 
+    public async Task<bool> ChangePasswordAsync(string email, string currentPassword, string newPassword)
+    {
+        var user = await _userRepository.GetUserByEmailAsync(email);
+        if (user == null)
+            return false;
+
+        if (!BCrypt.Net.BCrypt.Verify(currentPassword, user.PasswordHash))
+            return false;
+
+        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
+        await _userRepository.UpdateUserAsync(user);
+        return true;
+    }
+
     public string GenerateJwtToken(User user, int? memberId = null)
     {
         var key = new SymmetricSecurityKey(
