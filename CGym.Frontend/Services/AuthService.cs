@@ -66,7 +66,7 @@ namespace CGym.Frontend.Services
                 return (false, AdminMustUseAdminLoginMessage);
 
             Token = token;
-            CurrentMemberId = GetUserIdFromToken(Token);
+            CurrentMemberId = GetMemberIdFromToken(Token);
             CurrentEmail = GetEmailFromToken(Token);
             CurrentRole = role;
             IsAdmin = CurrentRole == "Admin";
@@ -91,6 +91,12 @@ namespace CGym.Frontend.Services
 
             return (false, "Noget gik galt. Prøv igen.");
         }
+        public void UpdateCurrentEmail(string newEmail)
+        {
+            CurrentEmail = newEmail;
+            OnChange?.Invoke();
+        }
+
         public void Logout()
         {
             Token = null;
@@ -122,7 +128,7 @@ namespace CGym.Frontend.Services
             return message.Trim().Trim('"').TrimEnd('.');
         }
 
-        private static int? GetUserIdFromToken(string? token)
+        private static int? GetMemberIdFromToken(string? token)
         {
             if (string.IsNullOrWhiteSpace(token))
                 return null;
@@ -130,8 +136,7 @@ namespace CGym.Frontend.Services
             var handler = new JwtSecurityTokenHandler(); 
             var jwt = handler.ReadJwtToken(token);
 
-            var idClaim = jwt.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value
-                  ?? jwt.Claims.FirstOrDefault(c => c.Type == "nameid")?.Value;
+            var idClaim = jwt.Claims.FirstOrDefault(c => c.Type == "MemberId")?.Value;
 
             return int.TryParse(idClaim, out var id) ? id : null;
         }

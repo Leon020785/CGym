@@ -11,6 +11,9 @@ namespace CGym.Application.Interfaces
         Task<Member> AddAsync(Member member);  // Opret medlem
         Task<List<Member>> GetAllAsync(); // Hent Alle Medlemmer
         Task<Member?> GetByIdAsync(int id); // Hent via id
+        Task<Member?> GetByEmailAsync(string email); // Hent via email
+        Task<Member?> UpdateAsync(int id, string firstName, string lastName, string phoneNumber); // Opdater medlem
+        Task<Member?> UpdateEmailAsync(int memberId, string newEmail); // Opdater email (synkroniserer User og Member)
 
         Task DeleteAsync(int id); // slet medlem
 

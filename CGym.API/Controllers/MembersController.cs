@@ -47,6 +47,29 @@ namespace CGym.API.Controllers
             return CreatedAtAction(nameof(GetById), new { id = member.Id }, member);
         }
 
+        // PUT: api/members/5
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] UpdateMemberRequest request)
+        {
+            var member = await _memberService.UpdateAsync(
+                id,
+                request.FirstName,
+                request.LastName,
+                request.PhoneNumber);
+
+            if (member == null) return NotFound();
+            return Ok(member);
+        }
+
+        // PUT: api/members/5/email
+        [HttpPut("{id}/email")]
+        public async Task<IActionResult> UpdateEmail(int id, [FromBody] UpdateEmailRequest request)
+        {
+            var member = await _memberService.UpdateEmailAsync(id, request.NewEmail);
+            if (member == null) return NotFound();
+            return Ok(member);
+        }
+
         // DELETE: api/members/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
@@ -58,4 +81,6 @@ namespace CGym.API.Controllers
 
     // DTO — definerer hvad API'et modtager ved oprettelse
     public record CreateMemberRequest(string FirstName, string LastName, string Email);
+    public record UpdateMemberRequest(string FirstName, string LastName, string PhoneNumber);
+    public record UpdateEmailRequest(string NewEmail);
 }

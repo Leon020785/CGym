@@ -11,6 +11,9 @@ namespace CGym.Application.Interfaces
         Task<Member> CreateMemberAsync(string firstName, string lastName, string email);
         Task<List<Member>> GetAllMembersAsync();
         Task<Member?> GetByIdAsync(int id);
+        Task<Member?> GetByEmailAsync(string email);
+        Task<Member?> UpdateAsync(int id, string firstName, string lastName, string phoneNumber);
+        Task<Member?> UpdateEmailAsync(int memberId, string newEmail);
         Task DeleteAsync(int id);
     }
 }

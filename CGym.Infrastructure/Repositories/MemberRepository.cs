@@ -49,5 +49,41 @@ namespace CGym.Infrastructure.Repositories
         {
             return await gymDbContext.Members.FindAsync(id);
         }
+
+        public async Task<Member?> GetByEmailAsync(string email)
+        {
+            return await gymDbContext.Members
+                .FirstOrDefaultAsync(member => member.Email == email);
+        }
+
+        public async Task<Member?> UpdateAsync(int id, string firstName, string lastName, string phoneNumber)
+        {
+            var member = await gymDbContext.Members.FindAsync(id);
+
+            if (member == null)
+            {
+                return null;
+            }
+
+            member.Update(firstName, lastName, phoneNumber);
+            await gymDbContext.SaveChangesAsync();
+
+            return member;
+        }
+
+        public async Task<Member?> UpdateEmailAsync(int memberId, string newEmail)
+        {
+            var member = await gymDbContext.Members.FindAsync(memberId);
+            if (member == null) return null;
+
+            var user = await gymDbContext.Users.FirstOrDefaultAsync(u => u.Email == member.Email);
+
+            member.UpdateEmail(newEmail);
+            if (user != null)
+                user.Email = newEmail;
+
+            await gymDbContext.SaveChangesAsync();
+            return member;
+        }
     }
 }
