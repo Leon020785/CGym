@@ -62,8 +62,13 @@ namespace CGym.Application.Services
                 if (existing == null)
 
                     throw new KeyNotFoundException("Booking Not found");
-                
+
                 await _bookingRepository.DeleteAsync(id);
+        }
+
+        public async Task<IEnumerable<Booking>> GetByMemberIdAsync(int memberId)
+        {
+            return await _bookingRepository.GetByMemberIdAsync(memberId);
         }
     }
 }

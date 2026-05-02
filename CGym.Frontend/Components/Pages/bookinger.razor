@@ -207,6 +207,7 @@
         var apiBookings = await BookingService.GetBookingsAsync();
 
         bookinger = apiBookings
+            .Where(b => b.Activity?.StartTime >= DateTime.Now)
             .Select(b => new BookingItem(
                 b.Id,
                 b.Activity?.Name ?? "Ukendt aktivitet",

@@ -21,15 +21,17 @@
 
         <!-- Stats -->
         <div class="stats-grid">
-            <div class="stat-card green">
+            <div class="stat-card green" @onclick='() => Nav.NavigateTo("/bookinger")' style="cursor:pointer">
                 <span class="stat-icon"><i class="ti ti-calendar"></i></span>
                 <div class="stat-number">@aktiveBookinger</div>
                 <div class="stat-label">Aktive bookinger</div>
+                <div class="stat-hint">Klik for at se dine bookinger</div>
             </div>
-            <div class="stat-card white">
+            <div class="stat-card white" @onclick='() => Nav.NavigateTo("/aktiviteter")' style="cursor:pointer">
                 <span class="stat-icon"><i class="ti ti-clipboard-list"></i></span>
                 <div class="stat-number">@holdTilgaengelige</div>
                 <div class="stat-label">Hold tilgængelige</div>
+                <div class="stat-hint">Klik for at se tilgængelige hold</div>
             </div>
         </div>
 
@@ -43,12 +45,6 @@
         </div>
 
         <!-- Knapper -->
-        <a href="/aktiviteter" class="btn-full-green">
-            <i class="ti ti-calendar"></i> Se alle aktiviteter
-        </a>
-        <a href="/bookinger" class="btn-full-outline">
-            <i class="ti ti-clipboard-list"></i> Mine bookinger
-        </a>
 
         <!-- Fremskridt -->
         <div class="progress-card">
@@ -142,12 +138,24 @@
         .stat-card.green {
             background: #16a34a;
             color: white;
+            transition: background 0.2s, box-shadow 0.2s;
+        }
+
+        .stat-card.green:hover {
+            background: #15803d;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
         }
 
         .stat-card.white {
             background: white;
             border: 1.5px solid #e5e7eb;
             color: #111827;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .stat-card.white:hover {
+            border-color: #16a34a;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
         }
 
     .stat-icon {
@@ -162,6 +170,12 @@
     .stat-label {
         font-size: 13px;
         opacity: 0.85;
+    }
+
+    .stat-hint {
+        font-size: 11px;
+        opacity: 0.75;
+        margin-top: 4px;
     }
 
     .champion-banner {
@@ -332,7 +346,7 @@
         }
 
         var bookinger = await BookingService.GetBookingsAsync();
-        aktiveBookinger = bookinger.Count;
+        aktiveBookinger = bookinger.Count(b => b.Activity?.StartTime >= DateTime.Now);
         totalTraeningsdage = bookinger.Count;
 
         var nu = DateTime.Now;
@@ -351,7 +365,7 @@
         favoritAktivitet = favorit?.Key ?? "Ingen endnu";
 
         var aktiviteter = await ActivityService.GetActivitiesAsync();
-        holdTilgaengelige = aktiviteter.Count;
+        holdTilgaengelige = aktiviteter.Count(a => a.StartTime >= DateTime.Now);
     }
 }
 

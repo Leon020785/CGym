@@ -9,5 +9,6 @@ namespace CGym.Application.Interfaces
         // Opretter en booking hvis der er plads på holdet
 
         Task DeleteBookingAsync(int id);
+        Task<IEnumerable<Booking>> GetByMemberIdAsync(int memberId);
     }
 }

@@ -41,8 +41,14 @@ namespace CGym.Infrastructure.Repositories
 
         public async Task<List<Member>> GetAllAsync()
         {
-           return await gymDbContext.Members.ToListAsync(); // metoden til at hente alle medlemer.
+            var adminEmails = await gymDbContext.Users
+                .Where(u => u.IsAdmin)
+                .Select(u => u.Email)
+                .ToHashSetAsync();
 
+            return await gymDbContext.Members
+                .Where(m => !adminEmails.Contains(m.Email))
+                .ToListAsync();
         }
 
         public async Task<Member?> GetByIdAsync(int id)

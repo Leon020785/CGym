@@ -60,5 +60,14 @@ namespace CGym.Infrastructure.Repositories
             return await _context.Bookings
                 .CountAsync(b => b.ActivityId == activityId);
         }
+
+        public async Task<IEnumerable<Booking>> GetByMemberIdAsync(int memberId)
+        {
+            return await _context.Bookings
+                .Where(b => b.MemberId == memberId)
+                .Include(b => b.Activity)
+                .ThenInclude(a => a.Trainer)
+                .ToListAsync();
+        }
     }
 }
