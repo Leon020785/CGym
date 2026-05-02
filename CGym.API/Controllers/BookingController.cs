@@ -1,4 +1,5 @@
 ﻿using CGym.Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CGym.API.Controllers
@@ -43,6 +44,14 @@ namespace CGym.API.Controllers
             {
                 return NotFound(new { detail = "Aktivitet eller medlem blev ikke fundet." });
             }
+        }
+
+        [Authorize]
+        [HttpGet("member/{memberId:int}")]
+        public async Task<IActionResult> GetByMember(int memberId)
+        {
+            var bookings = await _bookingService.GetByMemberIdAsync(memberId);
+            return Ok(bookings);
         }
 
         [HttpDelete("{id:int}")]

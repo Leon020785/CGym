@@ -28,6 +28,12 @@ namespace CGym.Frontend.Services
             return await _http.GetFromJsonAsync<List<BookingApiModel>>("api/booking") ?? new();
         }
 
+        public async Task<List<BookingApiModel>> GetBookingsByMemberAsync(int memberId)
+        {
+            AddAuthHeader();
+            return await _http.GetFromJsonAsync<List<BookingApiModel>>($"api/booking/member/{memberId}") ?? new();
+        }
+
         // Opretter en booking i backend via POST endpoint.
         public async Task CreateBookingAsync(int memberId, int activityId)
         {

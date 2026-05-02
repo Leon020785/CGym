@@ -151,10 +151,11 @@
 
             </div>
 
-            <div class="stat-card green">
+            <div class="stat-card green clickable-card" @onclick="OpenMemberModal">
                 <span class="stat-icon"><i class="ti ti-user"></i></span>
                 <div class="stat-number">@totalMedlemmer</div>
                 <div class="stat-label">Totale medlemmer</div>
+                <div class="stat-hint">Klik for at se liste</div>
             </div>
         </div>
 
@@ -165,13 +166,117 @@
                 <div class="stat-label">Totale aktiviteter</div>
             </div>
 
-            <div class="stat-card pink">
+            <div class="stat-card pink clickable-card" @onclick="OpenBookingModal">
                 <span class="stat-icon"><i class="ti ti-calendar-plus"></i></span>
                 <div class="stat-number">@totalBookinger</div>
                 <div class="stat-label">Totale bookinger</div>
+                <div class="stat-hint">Klik for at se liste</div>
             </div>
         </div>
     </div>
+
+    @if (showMemberModal)
+    {
+        <div class="modal-backdrop" @onclick="CloseMemberModal">
+            <div class="modal-card" @onclick:stopPropagation="true">
+                <div class="modal-header">
+                    <div>
+                        <h3 class="modal-title">Medlemsliste</h3>
+                        <p class="modal-subtitle">@(totalMedlemmer == 1 ? "1 aktivt medlem" : $"{totalMedlemmer} aktive medlemmer")</p>
+                    </div>
+                    <button class="modal-close" @onclick="CloseMemberModal">✕</button>
+                </div>
+
+                @if (isLoadingMembers)
+                {
+                    <p class="modal-empty">Henter medlemmer...</p>
+                }
+                else if (allMembers.Count == 0)
+                {
+                    <p class="modal-empty">Ingen medlemmer fundet.</p>
+                }
+                else
+                {
+                    <div class="member-list">
+                        @foreach (var member in allMembers)
+                        {
+                            var upcomingBookings = memberBookings.GetValueOrDefault(member.Id, new())
+                                    .Where(b => b.Activity?.StartTime >= DateTime.Now)
+                                    .ToList();
+                            <div class="member-item">
+                                <div class="member-info">
+                                    <div class="member-name">@member.FirstName @member.LastName</div>
+                                    <div class="member-email">@member.Email</div>
+                                    <div class="member-phone">@(string.IsNullOrWhiteSpace(member.PhoneNumber) ? "Ikke oplyst" : member.PhoneNumber)</div>
+                                </div>
+                                <div class="member-bookings">
+                                    @if (upcomingBookings.Count == 0)
+                                    {
+                                        <span class="booking-empty">Ingen kommende bookinger</span>
+                                    }
+                                    else
+                                    {
+                                        @foreach (var b in upcomingBookings)
+                                        {
+                                            <span class="booking-tag">
+                                                <i class="ti ti-calendar"></i>
+                                                @b.Activity?.Name — @b.Activity?.StartTime.ToString("dd-MM-yyyy HH:mm")
+                                            </span>
+                                        }
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    @if (showBookingModal)
+    {
+        var upcomingAll = allBookings
+            .Where(b => b.Activity?.StartTime >= DateTime.Now)
+            .OrderBy(b => b.Activity?.StartTime)
+            .ToList();
+
+        <div class="modal-backdrop" @onclick="CloseBookingModal">
+            <div class="modal-card" @onclick:stopPropagation="true">
+                <div class="modal-header">
+                    <div>
+                        <h3 class="modal-title">Kommende bookinger</h3>
+                        <p class="modal-subtitle">@(upcomingAll.Count == 1 ? "1 booking" : $"{upcomingAll.Count} bookinger")</p>
+                    </div>
+                    <button class="modal-close" @onclick="CloseBookingModal">✕</button>
+                </div>
+
+                @if (upcomingAll.Count == 0)
+                {
+                    <p class="modal-empty">Ingen kommende bookinger.</p>
+                }
+                else
+                {
+                    <div class="member-list">
+                        @foreach (var b in upcomingAll)
+                        {
+                            var bMember = allMembers.FirstOrDefault(m => m.Id == b.MemberId);
+                            <div class="member-item">
+                                <div class="member-info">
+                                    <div class="member-name">@(b.Activity?.Name ?? "Ukendt aktivitet")</div>
+                                    <div class="member-email"><i class="ti ti-clock"></i> @b.Activity?.StartTime.ToString("dd-MM-yyyy HH:mm")</div>
+                                </div>
+                                <div class="member-info" style="text-align:right;">
+                                    <div class="member-name">@(bMember != null ? $"{bMember.FirstName} {bMember.LastName}" : "Ukendt")</div>
+                                    <div class="member-email">@(bMember?.Email ?? "")</div>
+                                    <div class="member-phone">@(string.IsNullOrWhiteSpace(bMember?.PhoneNumber) ? "Ikke oplyst" : bMember!.PhoneNumber)</div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    }
 
     <div class="upcoming-card">
         <div class="upcoming-header">
@@ -638,6 +743,161 @@
         gap: 12px;
     }
 
+    .clickable-card {
+        cursor: pointer;
+        transition: transform 0.15s, box-shadow 0.15s;
+    }
+
+        .clickable-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+
+    .stat-hint {
+        font-size: 12px;
+        opacity: 0.75;
+        margin-top: 4px;
+    }
+
+    .modal-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+    }
+
+    .modal-card {
+        background: white;
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 8px 40px rgba(0,0,0,0.2);
+        width: 100%;
+        max-width: 680px;
+        max-height: 80vh;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        flex-shrink: 0;
+    }
+
+    .modal-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: #111827;
+        margin: 0;
+    }
+
+    .modal-subtitle {
+        font-size: 13px;
+        color: #6b7280;
+        margin: 4px 0 0 0;
+    }
+
+    .modal-close {
+        background: #f3f4f6;
+        border: none;
+        border-radius: 8px;
+        width: 32px;
+        height: 32px;
+        font-size: 14px;
+        cursor: pointer;
+        color: #374151;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        transition: background 0.2s;
+    }
+
+        .modal-close:hover {
+            background: #e5e7eb;
+        }
+
+    .modal-empty {
+        color: #6b7280;
+        font-size: 14px;
+        margin: 0;
+    }
+
+    .member-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        overflow-y: auto;
+    }
+
+    .member-item {
+        background: #f9fafb;
+        border-radius: 12px;
+        padding: 14px 16px;
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        align-items: flex-start;
+    }
+
+    .member-info {
+        flex: 0 0 40%;
+        min-width: 0;
+    }
+
+    .member-name {
+        font-size: 15px;
+        font-weight: 700;
+        color: #111827;
+    }
+
+    .member-email {
+        font-size: 13px;
+        color: #6b7280;
+        margin-top: 2px;
+    }
+
+    .member-bookings {
+        flex: 0 0 60%;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        align-items: flex-start;
+    }
+
+    .booking-tag {
+        font-size: 12px;
+        color: #374151;
+        background: #e8f5e9;
+        border-radius: 6px;
+        padding: 4px 8px;
+        white-space: nowrap;
+    }
+
+        .booking-tag i {
+            color: #16a34a;
+            margin-right: 4px;
+        }
+
+    .booking-empty {
+        font-size: 12px;
+        color: #9ca3af;
+        font-style: italic;
+    }
+
+    .member-phone {
+        font-size: 13px;
+        color: #6b7280;
+        margin-top: 2px;
+    }
+
 </style>
 
 @code {
@@ -657,6 +917,12 @@
     private int totalMedlemmer = 0;
     private int totalAktiviteter = 0;
     private int totalBookinger = 0;
+    private bool showMemberModal = false;
+    private bool isLoadingMembers = false;
+    private List<CGym.Frontend.Models.Member> allMembers = new();
+    private Dictionary<int, List<BookingApiModel>> memberBookings = new();
+    private List<BookingApiModel> allBookings = new();
+    private bool showBookingModal = false;
     private string trainerEmail = "";
     private string trainerPhoneNumber = "";
     private string availableFrom = "";
@@ -712,9 +978,10 @@
     
             var members = await MemberService.GetMembersAsync();
             totalMedlemmer = members?.Count ?? 0;
+            allMembers = members ?? new();
 
-            var bookings = await BookingService.GetBookingsAsync();
-            totalBookinger = bookings.Count;
+            allBookings = await BookingService.GetBookingsAsync();
+            totalBookinger = allBookings.Count(b => b.Activity?.StartTime >= DateTime.Now);
 
         }
         catch
@@ -907,6 +1174,41 @@
         }
     }
 
+
+    private async Task OpenMemberModal()
+    {
+        showMemberModal = true;
+
+        if (memberBookings.Count == 0 && allMembers.Count > 0)
+        {
+            isLoadingMembers = true;
+            StateHasChanged();
+
+            try
+            {
+                var allBookings = await BookingService.GetBookingsAsync();
+                memberBookings = allBookings
+                    .GroupBy(b => b.MemberId)
+                    .ToDictionary(g => g.Key, g => g.ToList());
+            }
+            catch
+            {
+                memberBookings = new();
+            }
+            finally
+            {
+                isLoadingMembers = false;
+            }
+        }
+    }
+
+    private void CloseMemberModal()
+    {
+        showMemberModal = false;
+    }
+
+    private void OpenBookingModal() => showBookingModal = true;
+    private void CloseBookingModal() => showBookingModal = false;
 
     private record AktivitetItem(int Id, string Navn, string Trainer,DateTime StartTime, string Tidspunkt, int Kapacitet);
 }

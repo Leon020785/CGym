@@ -23,5 +23,6 @@ namespace CGym.Application.Interfaces
         //tæller antal bookinger på en aktivitet (capacity check)
         Task<int> CountByActivityIdAsync(int activityId);
 
+        Task<IEnumerable<Booking>> GetByMemberIdAsync(int memberId);
     }
 }
