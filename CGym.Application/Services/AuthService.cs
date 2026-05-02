@@ -18,6 +18,12 @@ public class AuthService
 
     public async Task RegisterUserAsync(string username, string email, string password)
     {
+        var existingUser = await _userRepository.GetUserByEmailAsync(email);
+        if (existingUser != null)
+        {
+            throw new InvalidOperationException("Email is already in use.");
+        }
+
         var passwordHash = BCrypt.Net.BCrypt.HashPassword(password);
 
         var user = new User
