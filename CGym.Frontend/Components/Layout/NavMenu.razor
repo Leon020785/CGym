@@ -69,28 +69,24 @@
     <div class="mobile-menu">
         @if (Auth.IsAuthenticated)
         {
-            <NavLink href="@HomeHref" Match="NavLinkMatch.All" class="mobile-item" @onclick="CloseMenu"><i class="ti ti-home-2"></i> Home</NavLink>
-            
             @if (Auth.IsAdmin)
             {
                 <NavLink href="@ActivityHref" class="mobile-item" @onclick="CloseMenu"><i class="ti ti-list"></i> Aktiviteter</NavLink>
-                <NavLink href="/admin/traenere" class="nav-item">
+                <NavLink href="/admin/traenere" class="mobile-item" @onclick="CloseMenu">
                     <i class="ti ti-users"></i> Træner
                 </NavLink>
+                <button type="button" class="mobile-logout" @onclick="Logout">Log ud</button>
             }
 
             @if (!Auth.IsAdmin)
             {
-                <button type="button" class="mobile-profile-button" @onclick="ToggleProfileMenu">
-                    <i class="ti ti-user-circle"></i> Min profil
-                </button>
-
-                @if (profileMenuOpen)
-                {
-                    <NavLink href="/profil" class="mobile-item mobile-profile-item" @onclick="CloseMenu">Mine oplysninger</NavLink>
-                    <NavLink href="/changePassword" class="mobile-item mobile-profile-item" @onclick="CloseMenu">Skift adgangskode</NavLink>
-                    <button type="button" class="mobile-logout" @onclick="Logout">Log ud</button>
-                }
+                <NavLink href="/profil" class="mobile-item" @onclick="CloseMenu">
+                    <i class="ti ti-id"></i> Mine oplysninger
+                </NavLink>
+                <NavLink href="/changePassword" class="mobile-item" @onclick="CloseMenu">
+                    <i class="ti ti-lock"></i> Skift adgangskode
+                </NavLink>
+                <button type="button" class="mobile-logout" @onclick="Logout">Log ud</button>
             }
         }
         else
@@ -286,23 +282,6 @@
         font-weight: 500;
         cursor: pointer;
         text-align: left;
-    }
-
-    .mobile-profile-button {
-        padding: 14px 16px 6px 16px;
-        background: transparent;
-        border: none;
-        color: #111827;
-        font-size: 15px;
-        font-weight: 600;
-        text-align: left;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-    }
-
-    .mobile-profile-item {
-        padding-left: 32px;
     }
 
     /* Admin link - subtle */
