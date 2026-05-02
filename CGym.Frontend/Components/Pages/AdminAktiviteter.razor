@@ -1,7 +1,8 @@
 ﻿@page "/admin/aktiviteter"
-@rendermode InteractiveServer
 @inject CGym.Frontend.Services.ActivityService ActivityService
 @inject CGym.Frontend.Services.TrainerService TrainerService
+@inject CGym.Frontend.Services.AuthService AuthService
+@inject NavigationManager Nav
 @using CGym.Frontend.Services
 
 
@@ -303,6 +304,12 @@
 
     protected override async Task OnInitializedAsync()
     {
+        if (!AuthService.IsAuthenticated || !AuthService.IsAdmin)
+        {
+            Nav.NavigateTo("/admin/login");
+            return;
+        }
+
         try
         {
             loadError = null;
@@ -440,3 +447,4 @@
         public int SpotsLeft => Capacity - Enrolled;
     }
 }
+

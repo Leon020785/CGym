@@ -1,5 +1,4 @@
 ﻿@page "/admin/traenere"
-@rendermode InteractiveServer
 @using CGym.Frontend.Services
 @inject TrainerService TrainerService
 @inject AuthService AuthService
@@ -378,7 +377,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        if (!AuthService.IsAdmin)
+        if (!AuthService.IsAuthenticated || !AuthService.IsAdmin)
         {
             Nav.NavigateTo("/admin/login");
             return;
@@ -572,3 +571,4 @@
 
     }
 }
+

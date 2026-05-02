@@ -1,9 +1,10 @@
 ﻿@page "/Bookinger"
-@rendermode InteractiveServer
 @inject CGym.Frontend.Services.BookingService BookingService
+@inject CGym.Frontend.Services.AuthService AuthService
+@inject NavigationManager Nav
 <div class="bookinger-wrapper">
     <div class="page-header">
-        <a href="/" class="back-btn">←</a>
+        <a href="/" class="back-btn">?</a>
         <h2 class="page-title">Mine bookinger</h2>
     </div>
     <p class="page-sub">Du har @bookinger.Count kommende bookinger</p>
@@ -191,6 +192,18 @@
 
     protected override async Task OnInitializedAsync()
     {
+        if (!AuthService.IsAuthenticated)
+        {
+            Nav.NavigateTo("/login");
+            return;
+        }
+
+        if (AuthService.IsAdmin)
+        {
+            Nav.NavigateTo("/admin");
+            return;
+        }
+
         var apiBookings = await BookingService.GetBookingsAsync();
 
         bookinger = apiBookings
@@ -234,3 +247,4 @@
 
     private record BookingItem(int Id, string Name, string Trainer, string Date, string Time, string Color);
 }
+

@@ -1,10 +1,9 @@
-﻿@rendermode InteractiveServer
-@implements IDisposable
+﻿@implements IDisposable
 @inject CGym.Frontend.Services.AuthService Auth
 @inject NavigationManager Nav
 
 <nav class="top-nav">
-    <a href="/" class="nav-brand"><i class="ti ti-barbell"></i> CGym</a>
+    <a href="@HomeHref" class="nav-brand"><i class="ti ti-barbell"></i> CGym</a>
 
     <!-- Hamburger knap (mobil) -->
     <button class="hamburger" @onclick="ToggleMenu">
@@ -20,10 +19,10 @@
 
     <!-- Desktop links -->
     <div class="nav-links desktop">
-        @if (!string.IsNullOrEmpty(Auth.Token))
+        @if (Auth.IsAuthenticated)
         {
-            <NavLink href="@(Auth.IsAdmin ? "/admin" : "/")" Match="NavLinkMatch.All" class="nav-item"><i class="ti ti-home-2"></i> Home</NavLink>
-            <NavLink href="@(Auth.IsAdmin ? "/admin/aktiviteter" : "/aktiviteter")" class="nav-item"><i class="ti ti-list"></i> Aktiviteter</NavLink>
+            <NavLink href="@HomeHref" Match="NavLinkMatch.All" class="nav-item"><i class="ti ti-home-2"></i> Home</NavLink>
+            <NavLink href="@ActivityHref" class="nav-item"><i class="ti ti-list"></i> Aktiviteter</NavLink>
 
             @if (Auth.IsAdmin)
             {
@@ -49,10 +48,10 @@
 @if (menuOpen)
 {
     <div class="mobile-menu">
-        @if (!string.IsNullOrEmpty(Auth.Token))
+        @if (Auth.IsAuthenticated)
         {
-            <NavLink href="@(Auth.IsAdmin ? "/admin" : "/")" Match="NavLinkMatch.All" class="mobile-item" @onclick="CloseMenu"><i class="ti ti-home-2"></i> Home</NavLink>
-            <NavLink href="@(Auth.IsAdmin ? "/admin/aktiviteter" : "/aktiviteter")" class="mobile-item" @onclick="CloseMenu"><i class="ti ti-list"></i> Aktiviteter</NavLink>
+            <NavLink href="@HomeHref" Match="NavLinkMatch.All" class="mobile-item" @onclick="CloseMenu"><i class="ti ti-home-2"></i> Home</NavLink>
+            <NavLink href="@ActivityHref" class="mobile-item" @onclick="CloseMenu"><i class="ti ti-list"></i> Aktiviteter</NavLink>
             
             @if (Auth.IsAdmin)
             {
@@ -223,6 +222,8 @@
 
 @code {
     private bool menuOpen = false;
+    private string HomeHref => Auth.IsAdmin ? "/admin" : "/";
+    private string ActivityHref => Auth.IsAdmin ? "/admin/aktiviteter" : "/aktiviteter";
 
     protected override void OnInitialized()
     {
@@ -246,6 +247,7 @@
     {
         Auth.Logout();
         menuOpen = false;
-        Nav.NavigateTo("/");
+        Nav.NavigateTo("/login");
     }
 }
+

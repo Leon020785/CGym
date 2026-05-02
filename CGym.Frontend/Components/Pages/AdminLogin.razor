@@ -1,5 +1,4 @@
-@page "/admin/login"
-@rendermode InteractiveServer
+﻿@page "/admin/login"
 @inject CGym.Frontend.Services.AuthService AuthService
 @inject NavigationManager Nav
 
@@ -19,7 +18,7 @@
 
         <div class="form-group">
             <label>Adgangskode</label>
-            <input @bind="password" type="password" placeholder="••••••••" class="input-field" />
+            <input @bind="password" type="password" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" class="input-field" />
         </div>
 
         @if (!string.IsNullOrEmpty(message))
@@ -157,15 +156,26 @@
         isLoading = true;
         message = "";
 
-        var result = await AuthService.AdminLogin(email, password);
-
-        if (!result.Succeeded)
+        try
         {
-            message = result.ErrorMessage ?? "Forkert email eller adgangskode.";
-            isLoading = false;
-            return;
-        }
+            var result = await AuthService.AdminLogin(email, password);
 
-        Nav.NavigateTo("/admin");
+            if (!result.Succeeded)
+            {
+                message = result.ErrorMessage ?? "Forkert email eller adgangskode.";
+                return;
+            }
+
+            Nav.NavigateTo("/admin");
+        }
+        catch
+        {
+            message = "Der skete en fejl ved login. PrÃ¸v igen.";
+        }
+        finally
+        {
+            isLoading = false;
+        }
     }
 }
+
