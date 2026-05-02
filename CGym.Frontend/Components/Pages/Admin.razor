@@ -152,7 +152,9 @@
 
             </div>
 
-            <div class="stat-card green clickable-card" @onclick="OpenMemberModal" role="button" tabindex="0" @onkeydown="@(e => { if (e.Key == "Enter" || e.Key == " ") OpenMemberModal(); })">
+            <div class="stat-card green clickable-card" @onclick="OpenMemberModal" 
+                        role="button" tabindex="0" @onkeydown="@(async e => 
+                        { if (e.Key == "Enter" || e.Key == " ") await OpenMemberModal(); })">
                 <span class="stat-icon"><i class="ti ti-user"></i></span>
                 <div class="stat-number">@totalMedlemmer</div>
                 <div class="stat-label">Totale medlemmer</div>
@@ -161,13 +163,18 @@
         </div>
 
         <div class="dashboard-right">
-            <div class="stat-card blue">
+            <div class="stat-card blue clickable-card" @onclick='() => Nav.NavigateTo("/admin/aktiviteter")' 
+                    role="button" tabindex="0" @onkeydown="@(e => { if (e.Key == "Enter" || 
+                    e.Key == " ") Nav.NavigateTo("/admin/aktiviteter"); })" style="cursor:pointer">
                 <span class="stat-icon"><i class="ti ti-trending-up"></i></span>
                 <div class="stat-number">@totalAktiviteter</div>
                 <div class="stat-label">Totale aktiviteter</div>
+                <div class="stat-hint">Klik for at se liste</div>
             </div>
 
-            <div class="stat-card pink clickable-card" @onclick="OpenBookingModal" role="button" tabindex="0" @onkeydown="@(e => { if (e.Key == "Enter" || e.Key == " ") OpenBookingModal(); })">
+            <div class="stat-card pink clickable-card" @onclick="OpenBookingModal" 
+                    role="button" tabindex="0" @onkeydown="@(async e => { if (e.Key == "Enter" ||
+                    e.Key == " ") await OpenBookingModal(); })">
                 <span class="stat-icon"><i class="ti ti-calendar-plus"></i></span>
                 <div class="stat-number">@totalBookinger</div>
                 <div class="stat-label">Totale bookinger</div>
@@ -927,6 +934,7 @@
     private List<CGym.Frontend.Models.Member> allMembers = new();
     private Dictionary<int, List<BookingApiModel>> memberBookings = new();
     private List<BookingApiModel> allBookings = new();
+    private bool allBookingsLoaded = false;
     private bool showBookingModal = false;
     private string trainerEmail = "";
     private string trainerPhoneNumber = "";
@@ -973,7 +981,7 @@
                     a.Capacity))
                 .ToList();
 
-            totalAktiviteter = aktiviteter.Count; 
+            totalAktiviteter = aktiviteter.Count(a => a.StartTime >= DateTime.Now);
 
             kommendeAktiviteter = aktiviteter
                 .Where(a => a.StartTime >= DateTime.Now)
@@ -986,6 +994,7 @@
             allMembers = members ?? new();
 
             allBookings = await BookingService.GetBookingsAsync();
+            allBookingsLoaded = true;
             totalBookinger = allBookings.Count(b => b.Activity?.StartTime >= DateTime.Now);
 
         }
@@ -1168,7 +1177,7 @@
         {
             await ActivityService.DeleteActivityAsync(a.Id);
             aktiviteter.Remove(a);
-            totalAktiviteter = aktiviteter.Count;
+            totalAktiviteter = aktiviteter.Count(a => a.StartTime >= DateTime.Now);
             success = true;
             message = $"{a.Navn} er slettet.";
         }
@@ -1192,7 +1201,7 @@
 
             try
             {
-                if (allBookings.Count == 0)
+                if (!allBookingsLoaded)
                     allBookings = await BookingService.GetBookingsAsync();
                 memberBookings = allBookings
                     .GroupBy(b => b.MemberId)
