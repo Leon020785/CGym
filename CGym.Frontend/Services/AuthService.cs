@@ -22,17 +22,21 @@ namespace CGym.Frontend.Services
             _http = factory.CreateClient("API");
         }
 
-        public async Task<bool> Login(string email, string password)
+        private const string InvalidLoginMessage = "Forkert email eller adgangskode.";
+        private const string AdminMustUseAdminLoginMessage = "Brug bruger-login i stedet.";
+        private const string UserHasNoAdminAccessMessage = "Kun admins kan logge ind her.";
+
+        public async Task<(bool Succeeded, string? ErrorMessage)> Login(string email, string password)
         {
             return await LoginCore("api/auth/Login", email, password, requireAdmin: false);
         }
 
-        public async Task<bool> AdminLogin(string email, string password)
+        public async Task<(bool Succeeded, string? ErrorMessage)> AdminLogin(string email, string password)
         {
             return await LoginCore("api/auth/admin-login", email, password, requireAdmin: true);
         }
 
-        private async Task<bool> LoginCore(string endpoint, string email, string password, bool requireAdmin)
+        private async Task<(bool Succeeded, string? ErrorMessage)> LoginCore(string endpoint, string email, string password, bool requireAdmin)
         {
             var response = await _http.PostAsJsonAsync(endpoint, new
             {
@@ -41,7 +45,10 @@ namespace CGym.Frontend.Services
             });
 
             if (!response.IsSuccessStatusCode)
-                return false;
+            {
+                var backendMessage = await response.Content.ReadAsStringAsync();
+                return (false, MapLoginError(backendMessage, requireAdmin));
+            }
 
             var result = await response.Content.ReadFromJsonAsync<LoginResponse>();
 
@@ -49,13 +56,13 @@ namespace CGym.Frontend.Services
             var role = GetRoleFromToken(token);
 
             if (string.IsNullOrWhiteSpace(token))
-                return false;
+                return (false, InvalidLoginMessage);
 
             if (requireAdmin && role != "Admin")
-                return false;
+                return (false, UserHasNoAdminAccessMessage);
 
             if (!requireAdmin && role == "Admin")
-                return false;
+                return (false, AdminMustUseAdminLoginMessage);
 
             Token = token;
             CurrentMemberId = GetUserIdFromToken(Token);
@@ -64,7 +71,7 @@ namespace CGym.Frontend.Services
             IsAdmin = CurrentRole == "Admin";
 
             OnChange?.Invoke();
-            return true;
+            return (true, null);
         }
 
         public async Task<(bool Succeeded, string? ErrorMessage)> Register(string username, string email, string password)
@@ -91,6 +98,27 @@ namespace CGym.Frontend.Services
             CurrentRole = null;
             IsAdmin = false;
             OnChange?.Invoke();
+        }
+
+        private static string MapLoginError(string? backendMessage, bool requireAdmin)
+        {
+            var normalizedMessage = NormalizeErrorMessage(backendMessage);
+
+            if (!requireAdmin && normalizedMessage == "Admin users must use the admin login endpoint")
+                return AdminMustUseAdminLoginMessage;
+
+            if (requireAdmin && normalizedMessage == "Only admin users can log in through this endpoint")
+                return UserHasNoAdminAccessMessage;
+
+            return InvalidLoginMessage;
+        }
+
+        private static string NormalizeErrorMessage(string? message)
+        {
+            if (string.IsNullOrWhiteSpace(message))
+                return "";
+
+            return message.Trim().Trim('"').TrimEnd('.');
         }
 
         private static int? GetUserIdFromToken(string? token)

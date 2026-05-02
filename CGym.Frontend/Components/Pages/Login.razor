@@ -193,14 +193,14 @@
         isLoading = true;
         message = "";
 
-        var success = await AuthService.Login(email, password);
-        if (success)
+        var result = await AuthService.Login(email, password);
+        if (result.Succeeded)
         {
             Nav.NavigateTo("/");
         }
         else
         {
-            message = "Forkert email eller adgangskode.";
+            message = result.ErrorMessage ?? "Forkert email eller adgangskode.";
         }
 
         isLoading = false;

@@ -157,19 +157,11 @@
         isLoading = true;
         message = "";
 
-        var success = await AuthService.AdminLogin(email, password);
+        var result = await AuthService.AdminLogin(email, password);
 
-        if (!success)
+        if (!result.Succeeded)
         {
-            message = "Forkert email eller adgangskode.";
-            isLoading = false;
-            return;
-        }
-
-        if (!AuthService.IsAdmin)
-        {
-            AuthService.Logout();
-            message = "Du har ikke adgang. Kun admins kan logge ind her.";
+            message = result.ErrorMessage ?? "Forkert email eller adgangskode.";
             isLoading = false;
             return;
         }
