@@ -30,13 +30,17 @@
 
         <!-- Stats -->
         <div class="stats-grid">
-            <div class="stat-card green" @onclick='() => Nav.NavigateTo("/bookinger")' role="button" tabindex="0" @onkeydown="@(e => { if (e.Key == "Enter" || e.Key == " ") Nav.NavigateTo("/bookinger"); })" style="cursor:pointer">
+            <div class="stat-card green" @onclick='() => Nav.NavigateTo("/bookinger")' 
+                    role="button" tabindex="0" @onkeydown="@(e => { if (e.Key == "Enter" || 
+                    e.Key == " ") Nav.NavigateTo("/bookinger"); })" @onkeydown:preventDefault style="cursor:pointer">
                 <span class="stat-icon"><i class="ti ti-calendar"></i></span>
                 <div class="stat-number">@aktiveBookinger</div>
                 <div class="stat-label">Aktive bookinger</div>
                 <div class="stat-hint">Klik for at se dine bookinger</div>
             </div>
-            <div class="stat-card white" @onclick='() => Nav.NavigateTo("/aktiviteter")' role="button" tabindex="0" @onkeydown="@(e => { if (e.Key == "Enter" || e.Key == " ") Nav.NavigateTo("/aktiviteter"); })" style="cursor:pointer">
+            <div class="stat-card white" @onclick='() => Nav.NavigateTo("/aktiviteter")' 
+                    role="button" tabindex="0" @onkeydown="@(e => { if (e.Key == "Enter" || 
+                    e.Key == " ") Nav.NavigateTo("/aktiviteter"); })" @onkeydown:preventDefault style="cursor:pointer">
                 <span class="stat-icon"><i class="ti ti-clipboard-list"></i></span>
                 <div class="stat-number">@holdTilgaengelige</div>
                 <div class="stat-label">Hold tilgængelige</div>

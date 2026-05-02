@@ -322,6 +322,7 @@
             var apiActivities = await ActivityService.GetActivitiesAsync();
 
             activities = apiActivities
+                .Where(a => a.StartTime >= DateTime.Now)
                 .Select(a => new ActivityItem(
                     a.Id,
                     a.Name,
@@ -415,6 +416,7 @@
             // genindlæs listen, så UI viser nyeste data
             var apiActivities = await ActivityService.GetActivitiesAsync();
             activities = apiActivities
+                .Where(a => a.StartTime >= DateTime.Now)
                 .Select(a => new ActivityItem(
                     a.Id,
                     a.Name,
