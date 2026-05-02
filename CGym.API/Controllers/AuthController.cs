@@ -41,20 +41,47 @@ namespace CGym.API.Controllers
         [HttpPost("Login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
-
             var user = await _authService.LoginUserAsync(
                 request.Email,
                 request.Password
                 );
+
             if (user == null)
             {
                 return Unauthorized("Invalid email or password");
             }
 
+            if (user.IsAdmin)
+            {
+                return Unauthorized("Admin users must use the admin login endpoint");
+            }
+
             var token = _authService.GenerateJwtToken(user);
 
             return Ok(new { token });
+        }
 
+        [HttpPost("admin-login")]
+        public async Task<IActionResult> AdminLogin([FromBody] LoginRequest request)
+        {
+            var user = await _authService.LoginUserAsync(
+                request.Email,
+                request.Password
+                );
+
+            if (user == null)
+            {
+                return Unauthorized("Invalid email or password");
+            }
+
+            if (!user.IsAdmin)
+            {
+                return Unauthorized("Only admin users can log in through this endpoint");
+            }
+
+            var token = _authService.GenerateJwtToken(user);
+
+            return Ok(new { token });
         }
     }
 }

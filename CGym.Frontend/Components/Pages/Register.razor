@@ -207,7 +207,7 @@
         message = "";
 
         var result = await AuthService.Register(username, email, password);
-        if (result)
+        if (result.Succeeded)
         {
             success = true;
             message = "Konto oprettet! Du sendes til login...";
@@ -217,7 +217,7 @@
         else
         {
             success = false;
-            message = "Noget gik galt. Prøv igen.";
+            message = result.ErrorMessage ?? "Noget gik galt. Prøv igen.";
         }
 
         isLoading = false;
