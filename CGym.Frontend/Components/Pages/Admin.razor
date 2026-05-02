@@ -1,6 +1,5 @@
 ﻿@using CGym.Frontend.Services
 @page "/admin"
-@rendermode InteractiveServer
 @inject ActivityService ActivityService
 @inject CGym.Frontend.Services.TrainerService TrainerService
 @inject AuthService AuthService
@@ -691,7 +690,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        if (!AuthService.IsAdmin)
+        if (!AuthService.IsAuthenticated || !AuthService.IsAdmin)
         {
             Nav.NavigateTo("/admin/login");
             return;
@@ -920,3 +919,4 @@
 
     private record AktivitetItem(int Id, string Navn, string Trainer,DateTime StartTime, string Tidspunkt, int Kapacitet);
 }
+

@@ -1,13 +1,13 @@
 ﻿@page "/aktiviteter"
-@rendermode InteractiveServer
 @inject CGym.Frontend.Services.BookingService BookingService
 @inject CGym.Frontend.Services.ActivityService ActivityService
 @inject CGym.Frontend.Services.AuthService AuthService
 @inject CGym.Frontend.Services.MemberService MemberService
+@inject NavigationManager Nav
 
 <div class="aktiviteter-wrapper">
     <div class="page-header">
-        <a href="/" class="back-btn">← </a>
+        <a href="/" class="back-btn">? </a>
         <h2 class="page-title">Aktiviteter</h2>
     </div>
     <p class="page-sub">Find og book dine yndlings træningshold</p>
@@ -182,6 +182,18 @@
 
     protected override async Task OnInitializedAsync()
     {
+        if (!AuthService.IsAuthenticated)
+        {
+            Nav.NavigateTo("/login");
+            return;
+        }
+
+        if (AuthService.IsAdmin)
+        {
+            Nav.NavigateTo("/admin");
+            return;
+        }
+
         try
         {
             loadError = null;
@@ -273,3 +285,4 @@
         public int SpotsLeft => Capacity - Enrolled;
     }
 }
+

@@ -16,6 +16,7 @@ namespace CGym.Frontend.Services
         public string? CurrentEmail { get; private set; }
         public string? CurrentRole { get; private set; }
         public bool IsAdmin { get; private set; }
+        public bool IsAuthenticated => !string.IsNullOrEmpty(Token);
 
         public AuthService(IHttpClientFactory factory)
         {
@@ -23,8 +24,8 @@ namespace CGym.Frontend.Services
         }
 
         private const string InvalidLoginMessage = "Forkert email eller adgangskode.";
-        private const string AdminMustUseAdminLoginMessage = "Brug bruger-login i stedet.";
-        private const string UserHasNoAdminAccessMessage = "Kun admins kan logge ind her.";
+        private const string AdminMustUseAdminLoginMessage = "Du er admin. Brug admin-login i stedet.";
+        private const string UserHasNoAdminAccessMessage = "Du har ikke adgang. Kun admins kan logge ind her.";
 
         public async Task<(bool Succeeded, string? ErrorMessage)> Login(string email, string password)
         {

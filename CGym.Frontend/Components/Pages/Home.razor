@@ -1,13 +1,10 @@
 ﻿@page "/"
-@rendermode InteractiveServer
 @inject CGym.Frontend.Services.AuthService Auth
 @inject NavigationManager Nav
 @inject CGym.Frontend.Services.BookingService BookingService
 @inject CGym.Frontend.Services.ActivityService ActivityService
 
-@if (!string.IsNullOrEmpty(Auth.Token))
-{
-    <div class="dashboard">
+<div class="dashboard">
         <!-- Header -->
         <div class="header">
             <h2 class="welcome-title">Velkommen tilbage!</h2>
@@ -70,7 +67,6 @@
             </div>
         </div>
     </div>
-}
 
 <style>
     .dashboard {
@@ -333,9 +329,15 @@
 
     protected override async Task OnInitializedAsync()
     {
-        if (string.IsNullOrEmpty(Auth.Token))
+        if (!Auth.IsAuthenticated)
         {
             Nav.NavigateTo("/login");
+            return;
+        }
+
+        if (Auth.IsAdmin)
+        {
+            Nav.NavigateTo("/admin");
             return;
         }
 
@@ -362,3 +364,4 @@
         holdTilgaengelige = aktiviteter.Count;
     }
 }
+

@@ -12,7 +12,7 @@ builder.Services.AddHttpClient("API", client =>
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-builder.Services.AddSingleton<AuthService>();  // Token overlever på tværs af requests
+builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<MemberService>();
 builder.Services.AddScoped<BookingService>();
 builder.Services.AddScoped<ActivityService>();
