@@ -5,7 +5,12 @@
 @inject NavigationManager Nav
 
 <div class="trainers-wrapper">
-    <h2 class="page-title">Trænere</h2>
+
+    <div class="page-header">
+        <a href="/admin" class="back-btn">←</a>
+        <h2 class="page-title">Trænere</h2>
+    </div>
+    
     <p class="page-sub">Administrer centerets trænere</p>
 
     @if (!string.IsNullOrEmpty(message))
@@ -123,8 +128,22 @@
         font-size: 24px;
         font-weight: 700;
         color: #111827;
-        margin-bottom: 16px;
+        margin: 0;
     }
+
+    .page-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 4px;
+    }
+
+    .back-btn {
+        font-size: 20px;
+        color: #111827;
+        text-decoration: none;
+    }
+
     .page-sub {
         color: #6b7280;
         font-size: 14px;

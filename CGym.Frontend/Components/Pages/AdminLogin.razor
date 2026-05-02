@@ -17,8 +17,8 @@
         </div>
 
         <div class="form-group">
-            <label>Adgangskode</label>
-            <input @bind="password" type="password" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" class="input-field" />
+            <label>Adgangskode</label
+            <input @bind="password" type="password" placeholder="••••••••" class="input-field" />
         </div>
 
         @if (!string.IsNullOrEmpty(message))
@@ -170,7 +170,7 @@
         }
         catch
         {
-            message = "Der skete en fejl ved login. PrÃ¸v igen.";
+            message = "Der skete en fejl ved login. Prøve igen.";
         }
         finally
         {
