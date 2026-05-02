@@ -1,6 +1,7 @@
 ﻿using CGym.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace CGym.API.Controllers
 {
@@ -50,6 +51,12 @@ namespace CGym.API.Controllers
         [HttpGet("member/{memberId:int}")]
         public async Task<IActionResult> GetByMember(int memberId)
         {
+            var isAdmin = User.FindFirstValue(ClaimTypes.Role) == "Admin";
+            var memberIdClaim = User.FindFirstValue("MemberId");
+
+            if (!isAdmin && (memberIdClaim == null || memberIdClaim != memberId.ToString()))
+                return Forbid();
+
             var bookings = await _bookingService.GetByMemberIdAsync(memberId);
             return Ok(bookings);
         }

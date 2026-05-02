@@ -6,6 +6,7 @@
 @inject NavigationManager Nav
 @inject MemberService MemberService
 @inject BookingService BookingService
+@inject IJSRuntime JS
 
 
 <div class="admin-wrapper">
@@ -151,7 +152,7 @@
 
             </div>
 
-            <div class="stat-card green clickable-card" @onclick="OpenMemberModal">
+            <div class="stat-card green clickable-card" @onclick="OpenMemberModal" role="button" tabindex="0" @onkeydown="@(e => { if (e.Key == "Enter" || e.Key == " ") OpenMemberModal(); })">
                 <span class="stat-icon"><i class="ti ti-user"></i></span>
                 <div class="stat-number">@totalMedlemmer</div>
                 <div class="stat-label">Totale medlemmer</div>
@@ -166,7 +167,7 @@
                 <div class="stat-label">Totale aktiviteter</div>
             </div>
 
-            <div class="stat-card pink clickable-card" @onclick="OpenBookingModal">
+            <div class="stat-card pink clickable-card" @onclick="OpenBookingModal" role="button" tabindex="0" @onkeydown="@(e => { if (e.Key == "Enter" || e.Key == " ") OpenBookingModal(); })">
                 <span class="stat-icon"><i class="ti ti-calendar-plus"></i></span>
                 <div class="stat-number">@totalBookinger</div>
                 <div class="stat-label">Totale bookinger</div>
@@ -256,10 +257,11 @@
                 }
                 else
                 {
+                    var membersById = allMembers.ToDictionary(m => m.Id);
                     <div class="member-list">
                         @foreach (var b in upcomingAll)
                         {
-                            var bMember = allMembers.FirstOrDefault(m => m.Id == b.MemberId);
+                            membersById.TryGetValue(b.MemberId, out var bMember);
                             <div class="member-item">
                                 <div class="member-info">
                                     <div class="member-name">@(b.Activity?.Name ?? "Ukendt aktivitet")</div>
@@ -778,6 +780,7 @@
         width: 100%;
         max-width: 680px;
         max-height: 80vh;
+        overflow-y: auto;
         display: flex;
         flex-direction: column;
         gap: 16px;
@@ -834,6 +837,7 @@
         flex-direction: column;
         gap: 10px;
         overflow-y: auto;
+        overflow-x: hidden;
     }
 
     .member-item {
@@ -878,7 +882,8 @@
         background: #e8f5e9;
         border-radius: 6px;
         padding: 4px 8px;
-        white-space: nowrap;
+        white-space: normal;
+        word-break: break-word;
     }
 
         .booking-tag i {
@@ -1178,6 +1183,7 @@
     private async Task OpenMemberModal()
     {
         showMemberModal = true;
+        await JS.InvokeVoidAsync("eval", "document.body.style.overflow='hidden'");
 
         if (memberBookings.Count == 0 && allMembers.Count > 0)
         {
@@ -1186,7 +1192,8 @@
 
             try
             {
-                var allBookings = await BookingService.GetBookingsAsync();
+                if (allBookings.Count == 0)
+                    allBookings = await BookingService.GetBookingsAsync();
                 memberBookings = allBookings
                     .GroupBy(b => b.MemberId)
                     .ToDictionary(g => g.Key, g => g.ToList());
@@ -1202,13 +1209,23 @@
         }
     }
 
-    private void CloseMemberModal()
+    private async Task CloseMemberModal()
     {
         showMemberModal = false;
+        await JS.InvokeVoidAsync("eval", "document.body.style.overflow=''");
     }
 
-    private void OpenBookingModal() => showBookingModal = true;
-    private void CloseBookingModal() => showBookingModal = false;
+    private async Task OpenBookingModal()
+    {
+        showBookingModal = true;
+        await JS.InvokeVoidAsync("eval", "document.body.style.overflow='hidden'");
+    }
+
+    private async Task CloseBookingModal()
+    {
+        showBookingModal = false;
+        await JS.InvokeVoidAsync("eval", "document.body.style.overflow=''");
+    }
 
     private record AktivitetItem(int Id, string Navn, string Trainer,DateTime StartTime, string Tidspunkt, int Kapacitet);
 }
