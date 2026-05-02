@@ -157,7 +157,7 @@
         isLoading = true;
         message = "";
 
-        var success = await AuthService.Login(email, password);
+        var success = await AuthService.AdminLogin(email, password);
 
         if (!success)
         {
