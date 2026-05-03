@@ -13,5 +13,7 @@ namespace CGym.Domain.Entities
 
         public DateTime CreatedAt { get; set;}
         public bool IsAdmin { get; set; }
+        public string? PasswordResetToken { get; set; }
+        public DateTime? PasswordResetTokenExpiry { get; set; }
     }
 }

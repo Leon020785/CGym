@@ -36,7 +36,24 @@
                 <NavLink href="/admin/traenere" class="nav-item">
                     <i class="ti ti-users"></i> Træner
                 </NavLink>
-                <button class="btn-logout" @onclick="Logout">Log ud</button>
+                <div class="profile-menu">
+                    <button type="button" class="nav-item profile-button admin-profile-button" @onclick="ToggleProfileMenu">
+                        <i class="ti ti-user-circle"></i> Min profil <i class="ti ti-chevron-down"></i>
+                    </button>
+
+                    @if (profileMenuOpen)
+                    {
+                        <div class="profile-nav-backdrop" @onclick="CloseProfileMenu"></div>
+                        <div class="profile-dropdown">
+                            <div class="profile-dropdown-name">@Auth.CurrentUsername</div>
+                            <div class="profile-dropdown-divider"></div>
+                            <NavLink href="/profil" class="profile-dropdown-item" @onclick="CloseProfileMenu"><i class="ti ti-user" style="margin-right:8px"></i>Mine oplysninger</NavLink>
+                            <NavLink href="/changePassword" class="profile-dropdown-item" @onclick="CloseProfileMenu"><i class="ti ti-lock" style="margin-right:8px"></i>Skift adgangskode</NavLink>
+                            <div class="profile-dropdown-divider"></div>
+                            <button type="button" class="profile-dropdown-item profile-logout" @onclick="Logout"><i class="ti ti-logout" style="margin-right:8px"></i>Log ud</button>
+                        </div>
+                    }
+                </div>
             }
 
             @if (!Auth.IsAdmin)
@@ -50,9 +67,12 @@
                     {
                         <div class="profile-nav-backdrop" @onclick="CloseProfileMenu"></div>
                         <div class="profile-dropdown">
-                            <NavLink href="/profil" class="profile-dropdown-item" @onclick="CloseProfileMenu">Mine oplysninger</NavLink>
-                            <NavLink href="/changePassword" class="profile-dropdown-item" @onclick="CloseProfileMenu">Skift adgangskode</NavLink>
-                            <button type="button" class="profile-dropdown-item profile-logout" @onclick="Logout">Log ud</button>
+                            <div class="profile-dropdown-name">@Auth.CurrentUsername</div>
+                            <div class="profile-dropdown-divider"></div>
+                            <NavLink href="/profil" class="profile-dropdown-item" @onclick="CloseProfileMenu"><i class="ti ti-user" style="margin-right:8px"></i>Mine oplysninger</NavLink>
+                            <NavLink href="/changePassword" class="profile-dropdown-item" @onclick="CloseProfileMenu"><i class="ti ti-lock" style="margin-right:8px"></i>Skift adgangskode</NavLink>
+                            <div class="profile-dropdown-divider"></div>
+                            <button type="button" class="profile-dropdown-item profile-logout" @onclick="Logout"><i class="ti ti-logout" style="margin-right:8px"></i>Log ud</button>
                         </div>
                     }
                 </div>
@@ -81,6 +101,12 @@
                 <NavLink href="@ActivityHref" class="mobile-item" @onclick="CloseMenu"><i class="ti ti-list"></i> Aktiviteter</NavLink>
                 <NavLink href="/admin/traenere" class="mobile-item" @onclick="CloseMenu">
                     <i class="ti ti-users"></i> Træner
+                </NavLink>
+                <NavLink href="/profil" class="mobile-item" @onclick="CloseMenu">
+                    <i class="ti ti-user"></i> Min profil
+                </NavLink>
+                <NavLink href="/changePassword" class="mobile-item" @onclick="CloseMenu">
+                    <i class="ti ti-lock"></i> Skift adgangskode
                 </NavLink>
                 <button type="button" class="mobile-logout" @onclick="Logout">Log ud</button>
             }
@@ -177,6 +203,15 @@
         z-index: 112;
     }
 
+    .admin-profile-button {
+        color: #1d4ed8;
+    }
+
+        .admin-profile-button:hover {
+            background: #eff6ff;
+            color: #1e40af;
+        }
+
     .profile-page-backdrop {
         position: fixed;
         inset: 0;
@@ -205,6 +240,20 @@
         flex-direction: column;
         gap: 4px;
         z-index: 110;
+    }
+
+    .profile-dropdown-name {
+        padding: 6px 12px 4px 12px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #9ca3af;
+        letter-spacing: 0.03em;
+    }
+
+    .profile-dropdown-divider {
+        border: none;
+        border-top: 1px solid #e5e7eb;
+        margin: 4px 0;
     }
 
     .profile-dropdown-item {

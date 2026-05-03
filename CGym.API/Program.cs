@@ -2,6 +2,7 @@ using CGym.Application.Interfaces;
 using CGym.Application.Services;
 using CGym.Infrastructure.Persistence;
 using CGym.Infrastructure.Repositories;
+using CGym.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -32,6 +33,15 @@ builder.Services.AddScoped<IActivityService, ActivityService>();
 
 // User authentication system
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IEmailService>(sp =>
+    new EmailService(
+        builder.Configuration["Email:SmtpHost"]!,
+        int.Parse(builder.Configuration["Email:SmtpPort"]!),
+        builder.Configuration["Email:SmtpUser"]!,
+        builder.Configuration["Email:SmtpPassword"]!,
+        builder.Configuration["Email:FromEmail"]!,
+        builder.Configuration["Email:FromName"]!
+    ));
 builder.Services.AddScoped<AuthService>();
 
 // Bookings
@@ -98,8 +108,8 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 
-app.UseMiddleware<GlobalExceptionMiddleware>();
 app.UseCors("AllowAll");
+app.UseMiddleware<GlobalExceptionMiddleware>();
 //app.UseHttpsRedirection();
 
 app.UseAuthentication();

@@ -328,9 +328,9 @@
 
 <style>
     .admin-wrapper {
+        width: 100%;
         padding: 24px 16px;
-        max-width: 900px;
-        margin: 0 auto;
+        box-sizing: border-box;
         font-family: 'Segoe UI', sans-serif;
         display: flex;
         flex-direction: column;
@@ -643,6 +643,10 @@
     }
 
     @@media (max-width: 768px) {
+        .admin-wrapper {
+            padding: 16px 8px;
+        }
+
         .dashboard-top-grid {
             grid-template-columns: 1fr;
         }

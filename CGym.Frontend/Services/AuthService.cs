@@ -14,6 +14,7 @@ namespace CGym.Frontend.Services
         public string? Token { get; private set; }
         public int? CurrentMemberId { get; private set; }
         public string? CurrentEmail { get; private set; }
+        public string? CurrentUsername { get; private set; }
         public string? CurrentRole { get; private set; }
         public bool IsAdmin { get; private set; }
         public bool IsAuthenticated => !string.IsNullOrEmpty(Token);
@@ -68,6 +69,7 @@ namespace CGym.Frontend.Services
             Token = token;
             CurrentMemberId = GetMemberIdFromToken(Token);
             CurrentEmail = GetEmailFromToken(Token);
+            CurrentUsername = GetUsernameFromToken(Token);
             CurrentRole = role;
             IsAdmin = CurrentRole == "Admin";
 
@@ -91,6 +93,25 @@ namespace CGym.Frontend.Services
 
             return (false, "Noget gik galt. Prøv igen.");
         }
+        public async Task<(bool Succeeded, string? ErrorMessage)> ForgotPasswordAsync(string email)
+        {
+            var response = await _http.PostAsJsonAsync("api/auth/forgot-password", new { email });
+            if (response.IsSuccessStatusCode)
+                return (true, null);
+
+            return (false, "Noget gik galt. Prøv igen.");
+        }
+
+        public async Task<(bool Succeeded, string? ErrorMessage)> ResetPasswordAsync(string token, string newPassword)
+        {
+            var response = await _http.PostAsJsonAsync("api/auth/reset-password", new { token, newPassword });
+            if (response.IsSuccessStatusCode)
+                return (true, null);
+
+            var msg = await response.Content.ReadAsStringAsync();
+            return (false, msg.Trim('"'));
+        }
+
         public void UpdateCurrentEmail(string newEmail)
         {
             CurrentEmail = newEmail;
@@ -102,6 +123,7 @@ namespace CGym.Frontend.Services
             Token = null;
             CurrentMemberId = null;
             CurrentEmail = null;
+            CurrentUsername = null;
             CurrentRole = null;
             IsAdmin = false;
             OnChange?.Invoke();
@@ -151,6 +173,18 @@ namespace CGym.Frontend.Services
 
             return jwt.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value
                 ?? jwt.Claims.FirstOrDefault(c => c.Type == "email")?.Value;
+        }
+
+        private static string? GetUsernameFromToken(string? token)
+        {
+            if (string.IsNullOrWhiteSpace(token))
+                return null;
+
+            var handler = new JwtSecurityTokenHandler();
+            var jwt = handler.ReadJwtToken(token);
+
+            return jwt.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value
+                ?? jwt.Claims.FirstOrDefault(c => c.Type == "name")?.Value;
         }
 
         private static string? GetRoleFromToken(string? token)

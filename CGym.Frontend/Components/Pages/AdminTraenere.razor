@@ -118,9 +118,9 @@
 
 <style>
     .trainers-wrapper {
+        width: 100%;
         padding: 24px 16px;
-        max-width: 800px;
-        margin: 0 auto;
+        box-sizing: border-box;
         font-family: 'Segoe UI', sans-serif;
     }
 
@@ -363,6 +363,19 @@
         gap: 12px;
     }
 
+    @@media (max-width: 768px) {
+        .trainers-wrapper {
+            padding: 16px 8px;
+        }
+
+        .weekday-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .time-grid {
+            grid-template-columns: 1fr;
+        }
+    }
 
 </style>
 

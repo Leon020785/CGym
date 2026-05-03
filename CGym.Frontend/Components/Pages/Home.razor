@@ -70,9 +70,9 @@
 
 <style>
     .dashboard {
+        width: 100%;
         padding: 24px 16px;
-        max-width: 800px;
-        margin: 0 auto;
+        box-sizing: border-box;
         font-family: 'Segoe UI', sans-serif;
         display: flex;
         flex-direction: column;
@@ -324,6 +324,16 @@
         font-weight: 600;
         text-decoration: none;
         border: 2px solid #16a34a;
+    }
+
+    @@media (max-width: 768px) {
+        .dashboard {
+            padding: 16px 8px;
+        }
+
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
     }
 </style>
 
