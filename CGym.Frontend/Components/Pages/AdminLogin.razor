@@ -17,7 +17,7 @@
         </div>
 
         <div class="form-group">
-            <label>Adgangskode</label
+            <label>Adgangskode</label>
             <input @bind="password" type="password" placeholder="••••••••" class="input-field" />
         </div>
 
@@ -25,6 +25,8 @@
         {
             <p class="error-msg">@message</p>
         }
+
+        <p class="register-link"><a href="/admin/forgot-password">Glemt adgangskode?</a></p>
 
         <button @onclick="HandleLogin" class="btn-login" disabled="@isLoading">
             @if (isLoading)
@@ -36,12 +38,18 @@
                 <span>Log ind som admin</span>
             }
         </button>
+
+        <p class="register-link">
+            Har du ikke en konto? <a href="/admin/register">Opret admin</a>
+        </p>
     </div>
 </div>
 
 <style>
     .login-wrapper {
-        min-height: 100vh;
+        height: calc(100vh - 60px);
+        overflow: hidden;
+        width: 100%;
         background: linear-gradient(135deg, #1e3a5f 0%, #1e40af 50%, #1d4ed8 100%);
         display: flex;
         align-items: center;
@@ -53,8 +61,8 @@
         background: white;
         border-radius: 20px;
         padding: 48px 40px;
-        width: 100%;
-        max-width: 400px;
+        width: 90%;
+        max-width: 420px;
         box-shadow: 0 8px 40px rgba(0,0,0,0.20);
         display: flex;
         flex-direction: column;
@@ -142,6 +150,29 @@
         color: #dc2626;
         font-size: 14px;
         margin: 0;
+    }
+
+    .register-link {
+        font-size: 14px;
+        color: #6b7280;
+        margin-top: 4px;
+        margin-bottom: 0;
+    }
+
+        .register-link a {
+            color: #1d4ed8;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+            .register-link a:hover {
+                text-decoration: underline;
+            }
+
+    @@media (max-width: 480px) {
+        .login-card {
+            padding: 24px 16px;
+        }
     }
 </style>
 

@@ -1,6 +1,8 @@
 ﻿using CGym.Application.Interfaces;
 using CGym.Domain.Entities;
 using System;
+using System.Net;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -10,13 +12,15 @@ using System.Text;
 public class AuthService
 {
     private readonly IUserRepository _userRepository;
+    private readonly IEmailService _emailService;
 
-    public AuthService(IUserRepository userRepository)
+    public AuthService(IUserRepository userRepository, IEmailService emailService)
     {
         _userRepository = userRepository;
+        _emailService = emailService;
     }
 
-    public async Task RegisterUserAsync(string username, string email, string password)
+    public async Task RegisterUserAsync(string username, string email, string password, bool isAdmin = false)
     {
         var existingUser = await _userRepository.GetUserByEmailAsync(email);
         if (existingUser != null)
@@ -31,7 +35,8 @@ public class AuthService
             Username = username,
             Email = email,
             PasswordHash = passwordHash,
-            CreatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.UtcNow,
+            IsAdmin = isAdmin
         };
 
         await _userRepository.AddUserAsync(user);
@@ -62,6 +67,35 @@ public class AuthService
             return false;
 
         user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
+        await _userRepository.UpdateUserAsync(user);
+        return true;
+    }
+
+    public async Task ForgotPasswordAsync(string email, string resetPath = "reset-password")
+    {
+        var user = await _userRepository.GetUserByEmailAsync(email);
+        if (user == null) return;
+
+        var rawToken = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
+        var urlToken = WebUtility.UrlEncode(rawToken);
+
+        user.PasswordResetToken = rawToken;
+        user.PasswordResetTokenExpiry = DateTime.UtcNow.AddHours(1);
+        await _userRepository.UpdateUserAsync(user);
+
+        var resetLink = $"https://localhost:7298/{resetPath}?token={urlToken}";
+        await _emailService.SendPasswordResetEmailAsync(user.Email, resetLink);
+    }
+
+    public async Task<bool> ResetPasswordAsync(string token, string newPassword)
+    {
+        var user = await _userRepository.GetUserByResetTokenAsync(token);
+        if (user == null) return false;
+        if (user.PasswordResetTokenExpiry < DateTime.UtcNow) return false;
+
+        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
+        user.PasswordResetToken = null;
+        user.PasswordResetTokenExpiry = null;
         await _userRepository.UpdateUserAsync(user);
         return true;
     }

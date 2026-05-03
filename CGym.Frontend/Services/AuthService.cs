@@ -91,6 +91,25 @@ namespace CGym.Frontend.Services
 
             return (false, "Noget gik galt. Prøv igen.");
         }
+        public async Task<(bool Succeeded, string? ErrorMessage)> ForgotPasswordAsync(string email)
+        {
+            var response = await _http.PostAsJsonAsync("api/auth/forgot-password", new { email });
+            if (response.IsSuccessStatusCode)
+                return (true, null);
+
+            return (false, "Noget gik galt. Prøv igen.");
+        }
+
+        public async Task<(bool Succeeded, string? ErrorMessage)> ResetPasswordAsync(string token, string newPassword)
+        {
+            var response = await _http.PostAsJsonAsync("api/auth/reset-password", new { token, newPassword });
+            if (response.IsSuccessStatusCode)
+                return (true, null);
+
+            var msg = await response.Content.ReadAsStringAsync();
+            return (false, msg.Trim('"'));
+        }
+
         public void UpdateCurrentEmail(string newEmail)
         {
             CurrentEmail = newEmail;

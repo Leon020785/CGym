@@ -101,9 +101,9 @@
 
 <style>
     .profile-wrapper {
+        width: 100%;
         padding: 24px 16px;
-        max-width: 800px;
-        margin: 0 auto;
+        box-sizing: border-box;
         font-family: 'Segoe UI', sans-serif;
     }
 
@@ -330,6 +330,12 @@
         .btn-profile-primary,
         .btn-profile-outline {
             width: 100%;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .profile-wrapper {
+            padding: 16px 8px;
         }
     }
 </style>

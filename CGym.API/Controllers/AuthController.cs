@@ -39,6 +39,19 @@ namespace CGym.API.Controllers
         }
         
         
+        [HttpPost("admin/register")]
+        public async Task<IActionResult> AdminRegister([FromBody] RegisterRequest request)
+        {
+            await _authService.RegisterUserAsync(
+                request.Username,
+                request.Email,
+                request.Password,
+                isAdmin: true
+            );
+
+            return Ok("Admin registered successfully");
+        }
+
         [HttpPost("Login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
@@ -100,6 +113,23 @@ namespace CGym.API.Controllers
                 return BadRequest("Nuværende adgangskode er forkert.");
 
             return Ok("Adgangskode ændret.");
+        }
+
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
+        {
+            await _authService.ForgotPasswordAsync(request.Email);
+            return Ok("Hvis emailen findes, er et nulstillingslink sendt.");
+        }
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
+        {
+            var success = await _authService.ResetPasswordAsync(request.Token, request.NewPassword);
+            if (!success)
+                return BadRequest("Ugyldigt eller udløbet nulstillingslink.");
+
+            return Ok("Adgangskode nulstillet.");
         }
 
         private async Task<int> GetOrCreateMemberIdAsync(string username, string email)

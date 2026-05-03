@@ -1,35 +1,19 @@
-﻿@page "/register"
-@inject CGym.Frontend.Services.AuthService AuthService
+@page "/admin/register"
+@inject IHttpClientFactory HttpClientFactory
 @inject NavigationManager Nav
 
 <div class="login-wrapper">
     <div class="login-card">
         <div class="logo-icon">
-            <svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="28" cy="28" r="26" stroke="white" stroke-width="2" fill="none" />
-                <circle cx="28" cy="28" r="20" stroke="white" stroke-width="1" fill="none" />
-                <circle cx="28" cy="16" r="3" fill="white" />
-                <path d="M22 20 Q28 19 34 20 L32 30 H24 Z" fill="white" />
-                <path d="M22 20 L16 24 Q14 26 16 28 L20 26 L22 24" fill="white" />
-                <path d="M34 20 L40 24 Q42 26 40 28 L36 26 L34 24" fill="white" />
-                <path d="M24 30 L22 40 L26 40 L28 34 L30 40 L34 40 L32 30" fill="white" />
-                <path id="topArc" d="M 10,28 A 18,18 0 0,1 46,28" fill="none" />
-                <text font-size="5" fill="white" font-family="serif" font-weight="bold" letter-spacing="1">
-                    <textPath href="#topArc" startOffset="10%">— CGYM FITNESS —</textPath>
-                </text>
-                <path id="bottomArc" d="M 10,28 A 18,18 0 0,0 46,28" fill="none" />
-                <text font-size="4.5" fill="white" font-family="serif" letter-spacing="1">
-                    <textPath href="#bottomArc" startOffset="15%">SINCE 2025</textPath>
-                </text>
-            </svg>
+            <i class="ti ti-shield-lock" style="font-size:40px; color:white;"></i>
         </div>
 
-        <h1 class="brand">CGym</h1>
-        <p class="subtitle">Opret din konto</p>
+        <h1 class="brand">Admin Registrering</h1>
+        <p class="subtitle">Opret en ny admin konto</p>
 
         <div class="form-group">
             <label>Email</label>
-            <input @bind="email" type="email" placeholder="din.email@eksempel.dk" class="input-field" />
+            <input @bind="email" type="email" placeholder="admin@eksempel.dk" class="input-field" />
         </div>
 
         <div class="form-group">
@@ -95,12 +79,12 @@
             }
             else
             {
-                <span>Opret konto</span>
+                <span>Opret admin konto</span>
             }
         </button>
 
         <p class="register-link">
-            Har du allerede en konto? <a href="/login">Log ind</a>
+            Har du allerede en konto? <a href="/admin/login">Log ind</a>
         </p>
     </div>
 </div>
@@ -108,9 +92,9 @@
 <style>
     .login-wrapper {
         height: calc(100vh - 60px);
-        width: 100%;
         overflow: hidden;
-        background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 50%, #bbf7d0 100%);
+        width: 100%;
+        background: linear-gradient(135deg, #1e3a5f 0%, #1e40af 50%, #1d4ed8 100%);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -125,7 +109,7 @@
         max-width: 420px;
         max-height: 95vh;
         margin: 16px 0;
-        box-shadow: 0 8px 40px rgba(0,0,0,0.10);
+        box-shadow: 0 8px 40px rgba(0,0,0,0.20);
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -133,7 +117,7 @@
     }
 
     .logo-icon {
-        background: #16a34a;
+        background: #1d4ed8;
         border-radius: 16px;
         width: 55px;
         height: 55px;
@@ -182,13 +166,13 @@
     }
 
         .input-field:focus {
-            border-color: #16a34a;
+            border-color: #1d4ed8;
         }
 
     .btn-login {
         width: 100%;
         padding: 12px;
-        background: #16a34a;
+        background: #1d4ed8;
         color: white;
         border: none;
         border-radius: 10px;
@@ -200,11 +184,11 @@
     }
 
         .btn-login:hover {
-            background: #15803d;
+            background: #1e40af;
         }
 
         .btn-login:disabled {
-            background: #86efac;
+            background: #93c5fd;
             cursor: not-allowed;
         }
 
@@ -227,7 +211,7 @@
     }
 
         .register-link a {
-            color: #16a34a;
+            color: #1d4ed8;
             font-weight: 600;
             text-decoration: none;
         }
@@ -312,6 +296,13 @@
         isLoading = true;
         message = "";
 
+        if (!email.Contains('@'))
+        {
+            message = "Indtast en gyldig email.";
+            isLoading = false;
+            return;
+        }
+
         if (!RuleLength || !RuleUpper || !RuleDigit)
         {
             message = "Adgangskoden opfylder ikke kravene.";
@@ -327,21 +318,33 @@
         }
 
         var username = email.Split('@')[0];
-        var result = await AuthService.Register(username, email, password);
-        if (result.Succeeded)
+        var http = HttpClientFactory.CreateClient("API");
+
+        var response = await http.PostAsJsonAsync("api/auth/admin/register", new
+        {
+            username,
+            email,
+            password
+        });
+
+        if (response.IsSuccessStatusCode)
         {
             success = true;
-            message = "Konto oprettet! Du sendes til login...";
+            message = "Admin oprettet! Du sendes til login...";
             await Task.Delay(1500);
-            Nav.NavigateTo("/login");
+            Nav.NavigateTo("/admin/login");
+        }
+        else if (response.StatusCode == System.Net.HttpStatusCode.Conflict)
+        {
+            success = false;
+            message = "Emailen er allerede i brug.";
         }
         else
         {
             success = false;
-            message = result.ErrorMessage ?? "Noget gik galt. Prøv igen.";
+            message = "Noget gik galt. Prøv igen.";
         }
 
         isLoading = false;
     }
 }
-
