@@ -14,6 +14,7 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<AdminService>();
 builder.Services.AddScoped<MemberService>();
 builder.Services.AddScoped<BookingService>();
 builder.Services.AddScoped<ActivityService>();

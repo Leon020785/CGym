@@ -15,12 +15,16 @@ public class AuthService
     private readonly IUserRepository _userRepository;
     private readonly IEmailService _emailService;
     private readonly IConfiguration _configuration;
+    private readonly IAdminRepository _adminRepository;
+    private readonly IMemberRepository _memberRepository;
 
-    public AuthService(IUserRepository userRepository, IEmailService emailService, IConfiguration configuration)
+    public AuthService(IUserRepository userRepository, IEmailService emailService, IConfiguration configuration, IAdminRepository adminRepository, IMemberRepository memberRepository)
     {
         _userRepository = userRepository;
         _emailService = emailService;
         _configuration = configuration;
+        _adminRepository = adminRepository;
+        _memberRepository = memberRepository;
     }
 
     public async Task<User> RegisterUserAsync(string username, string email, string password, bool isAdmin = false)
@@ -105,7 +109,7 @@ public class AuthService
         return true;
     }
 
-    public string GenerateJwtToken(User user, int? memberId = null)
+    public async Task<string> GenerateJwtTokenAsync(User user, int? memberId = null)
     {
         var key = new SymmetricSecurityKey(
             Encoding.UTF8.GetBytes("THIS_IS_MY_SUPER_SECRET_KEY_12345"));
@@ -120,9 +124,24 @@ public class AuthService
             new Claim(ClaimTypes.Role, user.IsAdmin ? "Admin" : "User")
         };
 
-        if (memberId.HasValue)
+        if (user.IsAdmin)
+        {
+            var admin = await _adminRepository.GetByUserIdAsync(user.Id);
+            if (admin != null)
+            {
+                claims.Add(new Claim("FirstName", admin.FirstName ?? ""));
+                claims.Add(new Claim("LastName", admin.LastName ?? ""));
+            }
+        }
+        else if (memberId.HasValue)
         {
             claims.Add(new Claim("MemberId", memberId.Value.ToString()));
+            var member = await _memberRepository.GetByIdAsync(memberId.Value);
+            if (member != null)
+            {
+                claims.Add(new Claim("FirstName", member.FirstName ?? ""));
+                claims.Add(new Claim("LastName", member.LastName ?? ""));
+            }
         }
 
         var token = new JwtSecurityToken(
