@@ -54,7 +54,9 @@ namespace CGym.API.Controllers
             var admin = new Admin
             {
                 UserId = user.Id,
-                Name = user.Username,
+                FirstName = user.Username,
+                LastName = "",
+                PhoneNumber = "",
                 Email = user.Email,
                 CreatedAt = DateTime.UtcNow
             };
@@ -82,7 +84,7 @@ namespace CGym.API.Controllers
             }
 
             var memberId = await GetOrCreateMemberIdAsync(user.Username, user.Email, user.Id);
-            var token = _authService.GenerateJwtToken(user, memberId);
+            var token = await _authService.GenerateJwtTokenAsync(user, memberId);
 
             return Ok(new { token });
         }
@@ -106,7 +108,7 @@ namespace CGym.API.Controllers
             }
 
             var member = await _memberService.GetByEmailAsync(user.Email);
-            var token = _authService.GenerateJwtToken(user, member?.Id);
+            var token = await _authService.GenerateJwtTokenAsync(user, member?.Id);
 
             return Ok(new { token });
         }

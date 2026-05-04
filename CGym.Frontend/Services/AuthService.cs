@@ -12,9 +12,12 @@ namespace CGym.Frontend.Services
         public event Action? OnChange;
 
         public string? Token { get; private set; }
+        public int? CurrentUserId { get; private set; }
         public int? CurrentMemberId { get; private set; }
         public string? CurrentEmail { get; private set; }
         public string? CurrentUsername { get; private set; }
+        public string? CurrentFirstName { get; private set; }
+        public string? CurrentLastName { get; private set; }
         public string? CurrentRole { get; private set; }
         public bool IsAdmin { get; private set; }
         public bool IsAuthenticated => !string.IsNullOrEmpty(Token);
@@ -67,9 +70,12 @@ namespace CGym.Frontend.Services
                 return (false, AdminMustUseAdminLoginMessage);
 
             Token = token;
+            CurrentUserId = GetUserIdFromToken(Token);
             CurrentMemberId = GetMemberIdFromToken(Token);
             CurrentEmail = GetEmailFromToken(Token);
             CurrentUsername = GetUsernameFromToken(Token);
+            CurrentFirstName = GetFirstNameFromToken(Token);
+            CurrentLastName = GetLastNameFromToken(Token);
             CurrentRole = role;
             IsAdmin = CurrentRole == "Admin";
 
@@ -121,9 +127,12 @@ namespace CGym.Frontend.Services
         public void Logout()
         {
             Token = null;
+            CurrentUserId = null;
             CurrentMemberId = null;
             CurrentEmail = null;
             CurrentUsername = null;
+            CurrentFirstName = null;
+            CurrentLastName = null;
             CurrentRole = null;
             IsAdmin = false;
             OnChange?.Invoke();
@@ -148,6 +157,23 @@ namespace CGym.Frontend.Services
                 return "";
 
             return message.Trim().Trim('"').TrimEnd('.');
+        }
+
+        private static int? GetUserIdFromToken(string? token)
+        {
+            if (string.IsNullOrWhiteSpace(token)) return null;
+            var handler = new JwtSecurityTokenHandler();
+            var jwt = handler.ReadJwtToken(token);
+            var identity = new ClaimsIdentity(jwt.Claims);
+            var principal = new ClaimsPrincipal(identity);
+
+            var nameIdClaim = principal.Claims.FirstOrDefault(c =>
+                c.Type == ClaimTypes.NameIdentifier ||
+                c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier" ||
+                c.Type == "nameid" ||
+                c.Type == "sub");
+
+            return nameIdClaim != null && int.TryParse(nameIdClaim.Value, out var uid) ? uid : (int?)null;
         }
 
         private static int? GetMemberIdFromToken(string? token)
@@ -185,6 +211,28 @@ namespace CGym.Frontend.Services
 
             return jwt.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value
                 ?? jwt.Claims.FirstOrDefault(c => c.Type == "name")?.Value;
+        }
+
+        private static string? GetFirstNameFromToken(string? token)
+        {
+            if (string.IsNullOrWhiteSpace(token))
+                return null;
+
+            var handler = new JwtSecurityTokenHandler();
+            var jwt = handler.ReadJwtToken(token);
+
+            return jwt.Claims.FirstOrDefault(c => c.Type == "FirstName")?.Value;
+        }
+
+        private static string? GetLastNameFromToken(string? token)
+        {
+            if (string.IsNullOrWhiteSpace(token))
+                return null;
+
+            var handler = new JwtSecurityTokenHandler();
+            var jwt = handler.ReadJwtToken(token);
+
+            return jwt.Claims.FirstOrDefault(c => c.Type == "LastName")?.Value;
         }
 
         private static string? GetRoleFromToken(string? token)
