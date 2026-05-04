@@ -17,9 +17,9 @@ namespace CGym.Application.Services
         }
 
         // Opretter og gemmer et nyt medlem i databasen
-        public async Task<Member> CreateMemberAsync(string firstName, string lastName, string email)
+        public async Task<Member> CreateMemberAsync(string firstName, string lastName, string email, int userId)
         {
-            var member = new Member(firstName, lastName, email);
+            var member = new Member(firstName, lastName, email, userId);
             return await _memberRepository.AddAsync(member);
         }
 

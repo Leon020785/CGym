@@ -8,7 +8,7 @@ namespace CGym.Application.Interfaces
 {
     public interface IMemberService
     {
-        Task<Member> CreateMemberAsync(string firstName, string lastName, string email);
+        Task<Member> CreateMemberAsync(string firstName, string lastName, string email, int userId);
         Task<List<Member>> GetAllMembersAsync();
         Task<Member?> GetByIdAsync(int id);
         Task<Member?> GetByEmailAsync(string email);

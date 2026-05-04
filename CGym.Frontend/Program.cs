@@ -3,9 +3,10 @@ using CGym.Frontend.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var apiBaseUrl = builder.Configuration["ApiBaseUrl"] ?? "http://localhost:5259/";
 builder.Services.AddHttpClient("API", client =>
 {
-    client.BaseAddress = new Uri("http://localhost:5259/");
+    client.BaseAddress = new Uri(apiBaseUrl);
 });
 
 // Add services to the container.

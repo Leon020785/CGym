@@ -23,6 +23,7 @@ namespace CGym.API.Controllers
             return Ok(bookings); 
         }
 
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> CreateBooking([FromQuery] int memberId, [FromQuery] int activityId)
         {
@@ -61,6 +62,7 @@ namespace CGym.API.Controllers
             return Ok(bookings);
         }
 
+        [Authorize]
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {
