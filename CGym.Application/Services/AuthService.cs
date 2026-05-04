@@ -6,6 +6,7 @@ using System.Security.Cryptography;
 using System.Threading.Tasks;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
@@ -13,14 +14,16 @@ public class AuthService
 {
     private readonly IUserRepository _userRepository;
     private readonly IEmailService _emailService;
+    private readonly IConfiguration _configuration;
 
-    public AuthService(IUserRepository userRepository, IEmailService emailService)
+    public AuthService(IUserRepository userRepository, IEmailService emailService, IConfiguration configuration)
     {
         _userRepository = userRepository;
         _emailService = emailService;
+        _configuration = configuration;
     }
 
-    public async Task RegisterUserAsync(string username, string email, string password, bool isAdmin = false)
+    public async Task<User> RegisterUserAsync(string username, string email, string password, bool isAdmin = false)
     {
         var existingUser = await _userRepository.GetUserByEmailAsync(email);
         if (existingUser != null)
@@ -40,6 +43,7 @@ public class AuthService
         };
 
         await _userRepository.AddUserAsync(user);
+        return user;
     }
 
     public async Task<User?> LoginUserAsync(string email, string password)
@@ -83,7 +87,8 @@ public class AuthService
         user.PasswordResetTokenExpiry = DateTime.UtcNow.AddHours(1);
         await _userRepository.UpdateUserAsync(user);
 
-        var resetLink = $"https://localhost:7298/{resetPath}?token={urlToken}";
+        var frontendUrl = _configuration["FrontendUrl"] ?? "https://localhost:7298";
+        var resetLink = $"{frontendUrl}/{resetPath}?token={urlToken}";
         await _emailService.SendPasswordResetEmailAsync(user.Email, resetLink);
     }
 

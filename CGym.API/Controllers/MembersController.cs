@@ -37,17 +37,6 @@ namespace CGym.API.Controllers
             return Ok(member);
         }
 
-        // POST: api/members
-        [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreateMemberRequest request)
-        {
-            var member = await _memberService.CreateMemberAsync(
-                request.FirstName,
-                request.LastName,
-                request.Email);
-            return CreatedAtAction(nameof(GetById), new { id = member.Id }, member);
-        }
-
         // PUT: api/members/5
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateMemberRequest request)

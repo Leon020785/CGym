@@ -41,9 +41,7 @@ namespace CGym.Infrastructure.Repositories
 
         public async Task<List<Member>> GetAllAsync()
         {
-            return await gymDbContext.Members
-                .Where(m => !gymDbContext.Users.Any(u => u.IsAdmin && u.Email == m.Email))
-                .ToListAsync();
+            return await gymDbContext.Members.ToListAsync();
         }
 
         public async Task<Member?> GetByIdAsync(int id)
@@ -77,7 +75,7 @@ namespace CGym.Infrastructure.Repositories
             var member = await gymDbContext.Members.FindAsync(memberId);
             if (member == null) return null;
 
-            var user = await gymDbContext.Users.FirstOrDefaultAsync(u => u.Email == member.Email);
+            var user = await gymDbContext.Users.FindAsync(member.UserId);
 
             member.UpdateEmail(newEmail);
             if (user != null)
