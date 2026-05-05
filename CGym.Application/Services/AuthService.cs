@@ -111,8 +111,16 @@ public class AuthService
 
     public async Task<string> GenerateJwtTokenAsync(User user, int? memberId = null)
     {
+        var jwtKey = _configuration["Jwt:Key"];
+
+        if (string.IsNullOrWhiteSpace(jwtKey))
+        {
+            throw new InvalidOperationException("Jwt:Key is not configured.");
+        }
+
         var key = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes("THIS_IS_MY_SUPER_SECRET_KEY_12345"));
+            Encoding.UTF8.GetBytes(jwtKey));
+
 
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
