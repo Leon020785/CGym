@@ -48,9 +48,12 @@ builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<IBookingRepository, BookingRepository>();
 builder.Services.AddScoped<IBookingService, BookingService>();
 
-// Trainers 
+// Trainers
 builder.Services.AddScoped<ITrainerRepository, TrainerRepository>();
 builder.Services.AddScoped<ITrainerService, TrainerService>();
+
+// Admins
+builder.Services.AddScoped<IAdminRepository, AdminRepository>();
 
 // ------------------------------------------------------------
 

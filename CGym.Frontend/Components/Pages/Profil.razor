@@ -1,6 +1,7 @@
 @page "/profil"
 @inject CGym.Frontend.Services.AuthService Auth
 @inject CGym.Frontend.Services.MemberService Members
+@inject CGym.Frontend.Services.AdminService AdminSvc
 @inject NavigationManager Nav
 
 <div class="profile-wrapper">
@@ -358,21 +359,39 @@
 
     protected override async Task OnInitializedAsync()
     {
-        if (!Auth.IsAuthenticated || Auth.CurrentMemberId == null)
+        if (!Auth.IsAuthenticated)
         {
             Nav.NavigateTo("/login");
             return;
         }
 
-        memberId = Auth.CurrentMemberId.Value;
-
         try
         {
-            var member = await Members.GetMemberAsync(memberId.Value);
-            firstName = member.FirstName;
-            lastName = member.LastName;
-            email = member.Email;
-            phoneNumber = member.PhoneNumber;
+            Console.WriteLine($"[DEBUG] CurrentUserId={Auth.CurrentUserId}, IsAdmin={Auth.IsAdmin}");
+
+            if (Auth.IsAdmin)
+            {
+                var userId = Auth.CurrentUserId ?? 0;
+                var admin = await AdminSvc.GetAdminAsync(userId);
+                firstName = admin.FirstName;
+                lastName = admin.LastName;
+                phoneNumber = admin.PhoneNumber;
+                email = admin.Email;
+            }
+            else
+            {
+                if (Auth.CurrentMemberId == null)
+                {
+                    Nav.NavigateTo("/login");
+                    return;
+                }
+                memberId = Auth.CurrentMemberId.Value;
+                var member = await Members.GetMemberAsync(memberId.Value);
+                firstName = member.FirstName;
+                lastName = member.LastName;
+                email = member.Email;
+                phoneNumber = member.PhoneNumber;
+            }
             ResetEditValues();
         }
         catch
@@ -402,7 +421,7 @@
 
     private async Task SaveProfile()
     {
-        if (memberId == null)
+        if (!Auth.IsAdmin && memberId == null)
         {
             success = false;
             message = "Du skal være logget ind for at gemme.";
@@ -433,18 +452,32 @@
             editEmail = editEmail.Trim();
             editPhoneNumber = editPhoneNumber.Trim();
 
-            await Members.UpdateMemberAsync(memberId.Value, editFirstName, editLastName, editPhoneNumber);
-
-            if (!string.Equals(editEmail, email, StringComparison.OrdinalIgnoreCase))
+            if (Auth.IsAdmin)
             {
-                await Members.UpdateEmailAsync(memberId.Value, editEmail);
-                email = editEmail;
-                Auth.UpdateCurrentEmail(editEmail);
+                await AdminSvc.UpdateAdminAsync(Auth.CurrentUserId ?? 0, editFirstName, editLastName, editPhoneNumber, editEmail);
+                var updated = await AdminSvc.GetAdminAsync(Auth.CurrentUserId ?? 0);
+                firstName = updated.FirstName;
+                lastName = updated.LastName;
+                phoneNumber = updated.PhoneNumber;
+                email = updated.Email;
+                Auth.UpdateCurrentEmail(email);
+            }
+            else
+            {
+                await Members.UpdateMemberAsync(memberId!.Value, editFirstName, editLastName, editPhoneNumber);
+
+                if (!string.Equals(editEmail, email, StringComparison.OrdinalIgnoreCase))
+                {
+                    await Members.UpdateEmailAsync(memberId.Value, editEmail);
+                    email = editEmail;
+                    Auth.UpdateCurrentEmail(editEmail);
+                }
+
+                firstName = editFirstName;
+                lastName = editLastName;
+                phoneNumber = editPhoneNumber;
             }
 
-            firstName = editFirstName;
-            lastName = editLastName;
-            phoneNumber = editPhoneNumber;
             isEditing = false;
             success = true;
             message = "Profilen er opdateret.";

@@ -3,28 +3,30 @@ using CGym.Application.Services;
 using CGym.API.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using CGym.Application.Interfaces;
+using CGym.Domain.Entities;
 using System.Security.Claims;
 
 namespace CGym.API.Controllers
 {
-    
     [ApiController]
     [Route("api/auth")]
     public class AuthController : ControllerBase
     {
         private readonly AuthService _authService;
         private readonly IMemberService _memberService;
+        private readonly IAdminRepository _adminRepository;
 
-        public AuthController(AuthService authService, IMemberService memberService)
+        public AuthController(AuthService authService, IMemberService memberService, IAdminRepository adminRepository)
         {
             _authService = authService;
             _memberService = memberService;
+            _adminRepository = adminRepository;
         }
 
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequest request)
         {
-            await _authService.RegisterUserAsync(
+            var user = await _authService.RegisterUserAsync(
                 request.Username,
                 request.Email,
                 request.Password
@@ -32,22 +34,33 @@ namespace CGym.API.Controllers
             await _memberService.CreateMemberAsync(
                 request.Username,
                 "",
-                request.Email
+                request.Email,
+                user.Id
             );
 
             return Ok("User registered successfully");
         }
-        
-        
+
         [HttpPost("admin/register")]
         public async Task<IActionResult> AdminRegister([FromBody] RegisterRequest request)
         {
-            await _authService.RegisterUserAsync(
+            var user = await _authService.RegisterUserAsync(
                 request.Username,
                 request.Email,
                 request.Password,
                 isAdmin: true
             );
+
+            var admin = new Admin
+            {
+                UserId = user.Id,
+                FirstName = user.Username,
+                LastName = "",
+                PhoneNumber = "",
+                Email = user.Email,
+                CreatedAt = DateTime.UtcNow
+            };
+            await _adminRepository.AddAsync(admin);
 
             return Ok("Admin registered successfully");
         }
@@ -70,8 +83,8 @@ namespace CGym.API.Controllers
                 return Unauthorized("Admin users must use the admin login endpoint");
             }
 
-            var memberId = await GetOrCreateMemberIdAsync(user.Username, user.Email);
-            var token = _authService.GenerateJwtToken(user, memberId);
+            var memberId = await GetOrCreateMemberIdAsync(user.Username, user.Email, user.Id);
+            var token = await _authService.GenerateJwtTokenAsync(user, memberId);
 
             return Ok(new { token });
         }
@@ -95,7 +108,7 @@ namespace CGym.API.Controllers
             }
 
             var member = await _memberService.GetByEmailAsync(user.Email);
-            var token = _authService.GenerateJwtToken(user, member?.Id);
+            var token = await _authService.GenerateJwtTokenAsync(user, member?.Id);
 
             return Ok(new { token });
         }
@@ -132,13 +145,13 @@ namespace CGym.API.Controllers
             return Ok("Adgangskode nulstillet.");
         }
 
-        private async Task<int> GetOrCreateMemberIdAsync(string username, string email)
+        private async Task<int> GetOrCreateMemberIdAsync(string username, string email, int userId)
         {
             var member = await _memberService.GetByEmailAsync(email);
 
             if (member == null)
             {
-                member = await _memberService.CreateMemberAsync(username, "", email);
+                member = await _memberService.CreateMemberAsync(username, "", email, userId);
             }
 
             return member.Id;

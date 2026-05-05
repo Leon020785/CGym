@@ -45,7 +45,7 @@
                     {
                         <div class="profile-nav-backdrop" @onclick="CloseProfileMenu"></div>
                         <div class="profile-dropdown">
-                            <div class="profile-dropdown-name">@Auth.CurrentUsername</div>
+                            <div class="profile-dropdown-name">@ProfileDisplayName</div>
                             <div class="profile-dropdown-divider"></div>
                             <NavLink href="/profil" class="profile-dropdown-item" @onclick="CloseProfileMenu"><i class="ti ti-user" style="margin-right:8px"></i>Mine oplysninger</NavLink>
                             <NavLink href="/changePassword" class="profile-dropdown-item" @onclick="CloseProfileMenu"><i class="ti ti-lock" style="margin-right:8px"></i>Skift adgangskode</NavLink>
@@ -67,7 +67,7 @@
                     {
                         <div class="profile-nav-backdrop" @onclick="CloseProfileMenu"></div>
                         <div class="profile-dropdown">
-                            <div class="profile-dropdown-name">@Auth.CurrentUsername</div>
+                            <div class="profile-dropdown-name">@ProfileDisplayName</div>
                             <div class="profile-dropdown-divider"></div>
                             <NavLink href="/profil" class="profile-dropdown-item" @onclick="CloseProfileMenu"><i class="ti ti-user" style="margin-right:8px"></i>Mine oplysninger</NavLink>
                             <NavLink href="/changePassword" class="profile-dropdown-item" @onclick="CloseProfileMenu"><i class="ti ti-lock" style="margin-right:8px"></i>Skift adgangskode</NavLink>
@@ -80,7 +80,7 @@
         }
         else
         {
-            <NavLink href="/admin/login" class="admin-link">/AdminLogin </NavLink>
+            <a href="/admin/login" class="admin-link">/AdminLogin</a>
         }
     </div>
 </nav>
@@ -124,7 +124,7 @@
         }
         else
         {
-            <NavLink href="/admin/login" class="admin-link" @onclick="CloseMenu">/AdminLogin </NavLink>
+            <a href="/admin/login" class="admin-link">/AdminLogin</a>
         }
     </div>
 }
@@ -354,7 +354,7 @@
     .admin-link {
         font-size: 0.75rem;
         color: #374151;
-        text-decoration: none;
+        text-decoration: underline;
         opacity: 0.4;
     }
 
@@ -388,6 +388,9 @@
     private bool profileMenuOpen = false;
     private string HomeHref => Auth.IsAdmin ? "/admin" : "/";
     private string ActivityHref => Auth.IsAdmin ? "/admin/aktiviteter" : "/aktiviteter";
+    private string ProfileDisplayName => !string.IsNullOrEmpty(Auth.CurrentFirstName)
+        ? $"{Auth.CurrentFirstName} {Auth.CurrentLastName}"
+        : Auth.CurrentUsername ?? "";
 
     protected override void OnInitialized()
     {

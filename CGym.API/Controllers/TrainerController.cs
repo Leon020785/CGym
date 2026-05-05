@@ -1,5 +1,6 @@
 ﻿using CGym.Application.Interfaces;
 using CGym.Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CGym.API.Controllers
@@ -22,6 +23,7 @@ namespace CGym.API.Controllers
             return Ok(trainers);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateTrainerRequest request)
         {
@@ -33,6 +35,7 @@ namespace CGym.API.Controllers
             return Ok(trainer);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] CreateTrainerRequest request)
         {
@@ -46,6 +49,7 @@ namespace CGym.API.Controllers
             return Ok(updated);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {

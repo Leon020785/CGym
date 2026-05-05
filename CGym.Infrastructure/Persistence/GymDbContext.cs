@@ -10,9 +10,9 @@ namespace CGym.Infrastructure.Persistence
         {
         }
 
-        public DbSet<Member> Members { get; set; } // vis member ikke findes så tjekker vi her 
+        public DbSet<Member> Members { get; set; }
+        public DbSet<Admin> Admins { get; set; }
         public DbSet<User> Users { get; set; }
-
         public DbSet<Activity> Activities { get; set; }
         public DbSet<Trainer> Trainers { get; set; }
         public DbSet<Booking> Bookings { get; set; }
@@ -24,6 +24,18 @@ namespace CGym.Infrastructure.Persistence
                 .WithMany(t => t.Activities)
                 .HasForeignKey(a => a.TrainerId)
                 .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<Member>()
+                .HasOne(m => m.User)
+                .WithOne()
+                .HasForeignKey<Member>(m => m.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Admin>()
+                .HasOne(a => a.User)
+                .WithOne()
+                .HasForeignKey<Admin>(a => a.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
 
     }

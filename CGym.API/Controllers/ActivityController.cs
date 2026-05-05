@@ -1,5 +1,6 @@
 ﻿using CGym.Application.Interfaces;
 using CGym.Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CGym.API.Controllers
@@ -36,6 +37,7 @@ namespace CGym.API.Controllers
         }
 
         // POST create activity
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> Create(Activity activity)
         {
@@ -44,6 +46,7 @@ namespace CGym.API.Controllers
         }
 
         // PUT update activity
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] Activity activity)
         {
@@ -56,6 +59,7 @@ namespace CGym.API.Controllers
         }
 
         // DELETE activity
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
