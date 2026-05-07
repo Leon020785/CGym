@@ -18,9 +18,11 @@ namespace CGym.Infrastructure.Migrations
             migrationBuilder.Sql("DELETE FROM Users;");
 
             // Fjern delvist tilføjet UserId fra fejlede tidligere kørsel
-            migrationBuilder.Sql("ALTER TABLE Members DROP FOREIGN KEY IF EXISTS FK_Members_Users_UserId;");
-            migrationBuilder.Sql("DROP INDEX IF EXISTS IX_Members_UserId ON Members;");
-            migrationBuilder.Sql("ALTER TABLE Members DROP COLUMN IF EXISTS UserId;");
+            migrationBuilder.Sql(@"SET @exist := (SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE CONSTRAINT_SCHEMA = DATABASE() AND TABLE_NAME = 'Members' AND CONSTRAINT_NAME = 'FK_Members_Users_UserId'); SET @sql := IF(@exist > 0, 'ALTER TABLE Members DROP FOREIGN KEY FK_Members_Users_UserId', 'SELECT 1'); PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;");
+
+            migrationBuilder.Sql(@"SET @exist := (SELECT COUNT(*) FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'Members' AND INDEX_NAME = 'IX_Members_UserId'); SET @sql := IF(@exist > 0, 'DROP INDEX IX_Members_UserId ON Members', 'SELECT 1'); PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;");
+
+            migrationBuilder.Sql(@"SET @exist := (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'Members' AND COLUMN_NAME = 'UserId'); SET @sql := IF(@exist > 0, 'ALTER TABLE Members DROP COLUMN UserId', 'SELECT 1'); PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;");
 
             migrationBuilder.AddColumn<int>(
                 name: "UserId",
