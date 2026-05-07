@@ -4,4 +4,5 @@
   <Project Path="CGym.Domain/CGym.Domain.csproj" />
   <Project Path="CGym.Frontend/CGym.Frontend.csproj" Id="0a39550d-7d76-427f-80a0-cb18dde67286" />
   <Project Path="CGym.Infrastructure/CGym.Infrastructure.csproj" />
+  <Project Path="CGym.Tests/CGym.Tests.csproj" Id="0e3d38e3-c7fb-447c-a667-204ee1567c71" />
 </Solution>
