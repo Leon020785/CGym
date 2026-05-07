@@ -6,10 +6,12 @@ namespace CGym.Frontend.Services
     public class ActivityService
     {
         private readonly HttpClient _http;
+        private readonly AuthService _auth;
 
-        public ActivityService(IHttpClientFactory factory)
+        public ActivityService(IHttpClientFactory factory, AuthService auth)
         {
             _http = factory.CreateClient("API");
+            _auth = auth;
         }
 
         public async Task<List<ActivityApiModel>> GetActivitiesAsync()
@@ -19,23 +21,33 @@ namespace CGym.Frontend.Services
 
         public async Task<ActivityApiModel?> CreateActivityAsync(CreateActivityRequest request)
         {
+            AddAuthHeader();
             var response = await _http.PostAsJsonAsync("api/activity", request);
             response.EnsureSuccessStatusCode();
-            return await response.Content.ReadFromJsonAsync<ActivityApiModel>(); 
+            return await response.Content.ReadFromJsonAsync<ActivityApiModel>();
         }
 
         public async Task<ActivityApiModel?> UpdateActivityAsync(int id, CreateActivityRequest request)
         {
+            AddAuthHeader();
             var response = await _http.PutAsJsonAsync($"api/activity/{id}", request);
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<ActivityApiModel>();
         }
 
-
-        public async Task DeleteActivityAsync (int id)
+        public async Task DeleteActivityAsync(int id)
         {
+            AddAuthHeader();
             var response = await _http.DeleteAsync($"api/activity/{id}");
             response.EnsureSuccessStatusCode();
+        }
+
+        private void AddAuthHeader()
+        {
+            _http.DefaultRequestHeaders.Authorization = null;
+            if (!string.IsNullOrEmpty(_auth.Token))
+                _http.DefaultRequestHeaders.Authorization =
+                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _auth.Token);
         }
     }
 
